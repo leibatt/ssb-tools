@@ -33,6 +33,15 @@ function usage {
 	echo "For questions and details, contact $AUTHOR <$CONTACT_EMAIL> (or just read the source)."
 }
 
+# leilani: adding function to check for positive integers
+function is_positive_int(){
+  if [ "$1" -ge 0 ] 
+  then
+    return 0
+  else
+    return 1
+  fi
+}
 
 function die {
 	echo $1 >&2   # error message to stderr 

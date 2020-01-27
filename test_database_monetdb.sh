@@ -7,6 +7,7 @@ port=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))[
 log_name=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['log-name'])"`
 database_name=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['database-name'])"`
 scale_factor=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['scale-factor'])"`
+host=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['host'])"`
 
 # create the MonetDB database setup
-./scripts/setup-ssb-db -r -s $scale_factor -l $log_name -d $database_name -f $dbfarm_location -p $port
+./scripts/run_benchmark_queries.sh -H $host -d $database_name -p $port
