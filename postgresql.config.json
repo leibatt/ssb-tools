@@ -1,0 +1,9 @@
+{
+  "host":"localhost",
+  "pg_ctl_loc":"/scratch1/postgres/bin/pg_ctl",
+  "data_loc":"/scratch1/postgres/data",
+  "psql_loc":"/scratch1/postgres/bin/psql",
+  "log_loc":"/scratch1/postgres/logfile",
+  "password":"XA*yiTx_8Hko",
+  "port":5431
+}

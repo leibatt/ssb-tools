@@ -1,0 +1,9 @@
+{
+  "dbfarm-location":"/scratch1/monetdb_dbfarm",
+  "password":"XA*yiTx_8Hko",
+  "host":"localhost",
+  "port":50000,
+  "scale-factor":1,
+  "log-name":"setup.monetdb.log",
+  "database-name":"ssb-test"
+}
