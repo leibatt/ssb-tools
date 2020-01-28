@@ -1,16 +1,18 @@
 #!/bin/bash
 
-data_folder="/scratch1/leilani/code/ssb-tools-fork/generated_data"
+current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+root_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." >/dev/null 2>&1 && pwd )"
+data_folder="${root_dir}/generated_data"
 # uses monetdb user credentials
-export DOTMONETDBFILE="setup/monetdb/.monetdb"
+export DOTMONETDBFILE="${current_dir}/.monetdb"
 
 # locate the monetdb configuration file
-monetdb_config="monetdb.config.json"
+monetdb_config="${root_dir}/monetdb.config.json"
 # get the location to put the dbfarm
 database_name=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['database-name'])"`
 
 # create the tables
-mclient -d $database_name < createTables.sql
+mclient -d $database_name < $current_dir/../createTables.sql
 
 # load the data
 #COPY INTO customer  from 'PWD/customer.tbl'   USING DELIMITERS '|', '|\n';
