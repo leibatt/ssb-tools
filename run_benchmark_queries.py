@@ -50,7 +50,6 @@ class SSB:
     with open(self.get_workflow_path()) as f:
       json_data = json.load(f)
       self.workflow_queries = json_data["queries"]
-      #logger.info("total queries: %d" % (len(self.workflow_queries)))
 
     self.query_results = OrderedDict({ "args": vars(self.options), "results": deque() })
     self.benchmark_start_time = util.get_current_ms_time()
@@ -68,7 +67,7 @@ class SSB:
     def poll_results(slf, queue):
       global total_processed
       while total_processed < total_queries:
-        #logger.info("polling for results")
+        logger.info("polling for results")
         try:
           process_result = queue.get(timeout=1)
         except Empty:

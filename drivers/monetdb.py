@@ -45,7 +45,6 @@ class SSBDriver:
     result_queue.put(request)
 
   def process_request(self, request, result_queue, options):
-    logger.info("adding to queue")
     self.requests.put((request, result_queue, options))
 
   def process(self):
