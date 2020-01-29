@@ -24,3 +24,7 @@ kernel_tester
 dbgen/qgen
 dbgen/dbgen
 generated_data/
+env/
+results.json
+__pycache__/
+

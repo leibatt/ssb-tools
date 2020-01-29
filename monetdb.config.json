@@ -5,5 +5,6 @@
   "port":50000,
   "scale-factor":1,
   "log-name":"setup.monetdb.log",
-  "database-name":"ssb-test"
+  "database-name":"ssb-test",
+  "username":"ssbuser"
 }
