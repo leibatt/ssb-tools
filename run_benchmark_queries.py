@@ -18,7 +18,7 @@ logging.basicConfig(filename='output.log', level=logging.INFO)
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(logFormatter)
-logger = logging.getLogger("idebench")
+logger = logging.getLogger("ssb")
 logger.addHandler(consoleHandler)
 
 
@@ -50,7 +50,7 @@ class SSB:
     with open(self.get_workflow_path()) as f:
       json_data = json.load(f)
       self.workflow_queries = json_data["queries"]
-      logger.info("total queries: %d" % (len(self.workflow_queries)))
+      #logger.info("total queries: %d" % (len(self.workflow_queries)))
 
     self.query_results = OrderedDict({ "args": vars(self.options), "results": deque() })
     self.benchmark_start_time = util.get_current_ms_time()
@@ -61,12 +61,14 @@ class SSB:
     except AttributeError:
       pass
 
-    global do_poll
-    do_poll = True
+    total_queries = len(self.workflow_queries)
+    global total_processed
+    total_processed = 0
 
     def poll_results(slf, queue):
-      global count
-      while do_poll:
+      global total_processed
+      while total_processed < total_queries:
+        #logger.info("polling for results")
         try:
           process_result = queue.get(timeout=1)
         except Empty:
@@ -75,28 +77,16 @@ class SSB:
         if process_result is None:
           continue
         self.deliver_request(process_result)
+        total_processed = total_processed + 1
       logger.info("stopped polling results")
     thread = Thread(target = poll_results, args = (self, SSB.result_queue))
     thread.start()
 
-    procs = []
-    nprocs = len(self.workflow_queries)
-    if hasattr(self.driver, "use_single_process") and self.driver.use_single_process:
-      for query_id,query in enumerate(self.workflow_queries):
-        request = SqlRequest(query_id,query)
-        logger.info()
-        self.driver.process_request(request, SSB.result_queue, self.options)
-    else:
-      for query_id,query in enumerate(self.workflow_queries):
-        logger.info("query id: %d, ssb id: %s, query: \"%s\"" % (query_id,query["ssb_id"],query["sql_statement"]))
-        request = SqlRequest(query_id,query)
-        logger.info(request.toJson())
-        thread = Thread(target = self.driver.process_request, args = (request, SSB.result_queue, self.options))
-        procs.append(thread)
-        thread.start()
-        time.sleep(0.002) # so the request threads do not overwhelm some of the drivers (particularly verdictdb)
+    for query_id,query in enumerate(self.workflow_queries):
+      request = SqlRequest(query_id,query)
+      self.driver.process_request(request, SSB.result_queue, self.options)
+      #time.sleep(0.002) # so the request threads do not overwhelm some of the drivers (particularly verdictdb)
  
-    do_poll = False
     thread.join()
     self.end_run()
 
@@ -114,7 +104,7 @@ class SSB:
     with open(path, "w") as fp:
       res = OrderedDict({
         "args": self.query_results["args"],
-        "results": list(self.query_results)
+        "results": list(self.query_results["results"])
       })
       json.dump(res, fp, indent=4)
 
@@ -123,6 +113,7 @@ class SSB:
       self.workflow_start_time = request.start_time
     query_result = {}
     query_result["id"] = request.query_id
+    query_result["ssb_id"] = request.ssb_id
     query_result["sql"] = request.sql_statement
     query_result["start_time"] = request.start_time - self.workflow_start_time
     query_result["end_time"] = request.end_time - self.workflow_start_time

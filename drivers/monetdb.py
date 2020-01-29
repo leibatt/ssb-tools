@@ -8,6 +8,7 @@ import queue
 import multiprocessing
 import threading
 from threading import Thread
+from queue import Empty
 import logging
 from subprocess import call
 import util
@@ -20,12 +21,11 @@ class SSBDriver:
     self.config = json.load(open(os.path.join(os.path.dirname(__file__),'..','monetdb.config.json')))
 
   def create_connection(self):
-    conn = pymonetdb.connect(username="crossfilter", password=self.config['password'], hostname=self.config["host"], port=self.config['port'], database=self.config['database-name'])
+    conn = pymonetdb.connect(username=self.config["username"], password=self.config['password'], hostname=self.config["host"], port=self.config['port'], database=self.config['database-name'])
     return conn
 
   def execute_request(self, request, result_queue, options):
     # get a connection from the pool - block if non is available
-    logger.info(request.toJson())
     sql_statement = request.sql_statement
     connection = self.pool.get()
     cursor = connection.cursor()
@@ -40,11 +40,12 @@ class SSBDriver:
 
     results = []
     for row in data:
-      results.append(dict(row))
+      results.append(row)
     request.result = results
     result_queue.put(request)
 
   def process_request(self, request, result_queue, options):
+    logger.info("adding to queue")
     self.requests.put((request, result_queue, options))
 
   def process(self):
@@ -57,9 +58,12 @@ class SSBDriver:
         options = requestObject[2]
 
         self.execute_request(request, result_queue, options)
-      except:
+      except Empty:
         # ignore queue-empty exceptions
-        #pass
+        pass
+      except Exception as e:
+        logger.error("exception occurred")
+        logger.error(e)
         raise
     return
 
