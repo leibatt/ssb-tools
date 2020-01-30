@@ -4,116 +4,121 @@
       "ssb_id": "1.1",
       "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_year = [YEAR-0] and lo_discount between [DISCOUNT-0] - 1 and [DISCOUNT-1] + 1 and lo_quantity < [QUANTITY-0];",
       "parameters": {
-        "year": { "value": [1993], "domain": [1993,1997] , "filter-factor": 0.1428571428571429 },
-        "quantity":  { "value": [2,2], "domain": [24,25], "filter-factor": 0.47 },
-        "discount":  { "value": [25], "domain": [2,9], "filter-factor": 0.272727272727273}
+        "year": { "value": [1993], "domain": [1993,1997] , "filter-factor": 0.1428571428571429,"selectivity": {"select":1,"out-of":7} },
+        "quantity":  { "value": [25], "domain": [24,25], "filter-factor": 0.47,"selectivity": {"select":25,"out-of":50} },
+        "discount":  { "value": [2,2], "domain": [2,9], "filter-factor": 0.272727272727273,"selectivity": {"select":3,"out-of":11}}
       }
     },
     {
       "ssb_id": "1.2",
-      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_yearmonthnum = [YEARMONTHNUM-0] and lo_discount between [DISCOUNT-0] and [DISCOUNT-1] and lo_quantity between [QUANTITY-0] and [QUANTITY-1];",
+      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_yearmonthnum = [YEARMONTHNUM-0] and lo_discount between [DISCOUNT-0]-1 and [DISCOUNT-1]+1 and lo_quantity between [QUANTITY-0] and [QUANTITY-1];",
       "parameters": {
-        "yearmonthnum": { "value": [199401], "domain": null, "filter-factor": 0.011904761904762},
-        "discount": { "value": [4,6], "domain": null, "filter-factor": 0.272727272727273},
-        "quantity": { "value": [26,35], "domain": null, "filter-factor": 0.2}
+        "yearmonthnum": { "value": [199401], "domain": null, "filter-factor": 0.011904761904762,"selectivity": {"select":1,"out-of":84}},
+        "discount": { "value": [5,5], "domain": null, "filter-factor": 0.272727272727273,"selectivity": {"select":3,"out-of":11}},
+        "quantity": { "value": [26,35], "domain": null, "filter-factor": 0.2,"selectivity": {"select":10,"out-of":50}}
       }
     },
     {
       "ssb_id": "1.3",
-      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_weeknuminyear = [WEEKNUMINYEAR-0] and d_year = [YEAR-0] and lo_discount between [DISCOUNT-0] and [DISCOUNT-1] and lo_quantity between [QUANTITY-0] and [QUANTITY-1];",
+      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_weeknuminyear = [WEEKNUMINYEAR-0] and d_year = [YEAR-0] and lo_discount between [DISCOUNT-0]-1 and [DISCOUNT-1]+1 and lo_quantity between [QUANTITY-0] and [QUANTITY-1];",
       "parameters": {
-        "weeknuminyear": { "value": [6], "domain": null, "filter-factor": 0.019230769230769},
-        "year": { "value": [1994], "domain": null, "filter-factor": 0.142857142857143},
-        "quantity": { "value": [36,40] , "domain": null, "filter-factor": 0.1},
-        "discount": { "value": [5,7], "domain": null, "filter-factor": 0.272727272727273}
+        "weeknuminyear": { "value": [6], "domain": null, "filter-factor": 0.019230769230769,"selectivity": {"select":1,"out-of":52}},
+        "year": { "value": [1994], "domain": null, "filter-factor": 0.142857142857143,"selectivity": {"select":1,"out-of":7}},
+        "quantity": { "value": [36,40] , "domain": null, "filter-factor": 0.1},"selectivity": {"select":5,"out-of":50},
+        "discount": { "value": [6,6], "domain": null, "filter-factor": 0.272727272727273,"selectivity": {"select":3,"out-of":11}}
       }
     },
     {
       "ssb_id": "2.1",
       "sql_statement":"select sum(lo_revenue), d_year, p_brand1 from lineorder, date_, part, supplier where lo_orderdate = d_datekey and lo_partkey = p_partkey and lo_suppkey = s_suppkey and p_category = [CATEGORY-0] and s_region = [REGION-0] group by d_year, p_brand1 order by d_year, p_brand1;",
       "parameters": {
-        "category": { "value": ["MFGR#12"], "domain": null, "filter-factor": 0.04},
-        "region": { "value": ["AMERICA"], "domain": null, "filter-factor": 0.2}
+        "category": { "value": ["MFGR#12"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
+        "region": { "value": ["AMERICA"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}}
       }
     },
     {
       "ssb_id": "2.2",
       "sql_statement":"select sum(lo_revenue), d_year, p_brand1 from lineorder, date_, part, supplier where lo_orderdate = d_datekey and lo_partkey = p_partkey and lo_suppkey = s_suppkey and p_brand1 between [BRAND-0] and [BRAND-1] and s_region = [REGION-0] group by d_year, p_brand1 order by d_year, p_brand1; ",
       "parameters": {
-        "brand": { "value": ['MFGR#2221','MFGR#2228'], "domain": null, "filter-factor": 0.008},
-        "region": { "value": ['ASIA'], "domain": null, "filter-factor": 0.2}
+        "brand": { "value": ["MFGR#2221","MFGR#2228"], "domain": null, "filter-factor": 0.008,"selectivity": {"select":8,"out-of":1000}},
+        "region": { "value": ["ASIA"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}}
       }
     },
     {
       "ssb_id": "2.3",
-      "sql_statement":"select sum(lo_revenue), d_year, p_brand1 from lineorder, date_, part, supplier where lo_orderdate = d_datekey and lo_partkey = p_partkey and lo_suppkey = s_suppkey and p_brand1 = 'MFGR#2221' and s_region = 'EUROPE' group by d_year, p_brand1 order by d_year, p_brand1; ",
+      "sql_statement":"select sum(lo_revenue), d_year, p_brand1 from lineorder, date_, part, supplier where lo_orderdate = d_datekey and lo_partkey = p_partkey and lo_suppkey = s_suppkey and p_brand1 = [BRAND-0] and s_region = [REGION-0] group by d_year, p_brand1 order by d_year, p_brand1; ",
       "parameters": {
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": }
+        "brand": { "value": ["MFGR#2221"], "domain": null , "filter-factor": 0.001,"selectivity": {"select":1,"out-of":1000}},
+        "region": { "value": ["EUROPE"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}}
       }
     },
     {
       "ssb_id": "3.1",
-      "sql_statement":"select c_nation, s_nation, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_region = 'ASIA' and s_region = 'ASIA' and d_year >= 1992 and d_year <= 1997 group by c_nation, s_nation, d_year order by d_year asc, revenue desc; ",
+      "sql_statement":"select c_nation, s_nation, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_region = [REGION1-0] and s_region = [REGION2-0] and d_year >= [YEAR-0] and d_year <= [YEAR-1] group by c_nation, s_nation, d_year order by d_year asc, revenue desc; ",
       "parameters": {
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": }
+        "region1": { "value": ["ASIA"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}},
+        "region2": { "value": ["ASIA"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}},
+        "year": { "value": [1992,1997], "domain": null, "filter-factor": 0.857142857142857,"selectivity": {"select":6,"out-of":7}}
       }
     },
     {
       "ssb_id": "3.2",
-      "sql_statement":"select c_city, s_city, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_nation = 'UNITED STATES' and s_nation = 'UNITED STATES' and d_year >= 1992 and d_year <= 1997 group by c_city, s_city, d_year order by d_year asc, revenue desc; ",
+      "sql_statement":"select c_city, s_city, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_nation = [NATION1-0] and s_nation = [NATION2-0] and d_year >= [YEAR-0] and d_year <= [YEAR-1] group by c_city, s_city, d_year order by d_year asc, revenue desc; ",
       "parameters": {
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": }
+        "nation1": { "value": ["UNITED STATES"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
+        "nation2": { "value": ["UNITED STATES"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
+        "year": { "value": [1992,1997], "domain": null, "filter-factor": 0.857142857142857,"selectivity": {"select":6,"out-of":7}}
       }
     },
     {
       "ssb_id": "3.3",
-      "sql_statement":"select c_city, s_city, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_nation = 'UNITED KINGDOM' and (c_city='UNITED KI1' or c_city='UNITED KI5') and (s_city='UNITED KI1' or s_city='UNITED KI5') and s_nation = 'UNITED KINGDOM' and d_year >= 1992 and d_year <= 1997 group by c_city, s_city, d_year order by d_year asc, revenue desc; ",
+      "sql_statement":"select c_city, s_city, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_nation = [NATION1-0] and (c_city=[CITY1-0] or c_city=[CITY1-1]) and (s_city=[CITY2-0] or s_city=[CITY2-1]) and s_nation = [NATION2-0] and d_year >= 1992 and d_year <= 1997 group by c_city, s_city, d_year order by d_year asc, revenue desc; ",
       "parameters": {
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": }
+        "city1": { "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}},
+        "city2": { "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}},
+        "nation1": { "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
+        "nation2": { "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
+        "year": { "value": [1992,1997], "domain": null, "filter-factor": 0.857142857142857,"selectivity": {"select":6,"out-of":10}}
       }
     },
     {
       "ssb_id": "3.4",
-      "sql_statement":"select c_city, s_city, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_nation = 'UNITED KINGDOM' and (c_city='UNITED KI1' or c_city='UNITED KI5') and (s_city='UNITED KI1' or s_city='UNITED KI5') and s_nation = 'UNITED KINGDOM' and d_yearmonth = 'Dec1997' group by c_city, s_city, d_year order by d_year asc, revenue desc; ",
+      "sql_statement":"select c_city, s_city, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_nation = [NATION1-0] and (c_city=[CITY1-0] or c_city=[CITY1-1]) and (s_city=[CITY2-0] or s_city=[CITY2-1]) and s_nation = [NATION2-0] and d_yearmonth = [YEARMONTH-0] group by c_city, s_city, d_year order by d_year asc, revenue desc; ",
       "parameters": {
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": }
+        "city1": { "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}},
+        "city2": { "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}},
+        "nation1": { "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
+        "nation2": { "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
+        "yearmonth": { "value": ["Dec1997"], "domain": null, "filter-factor": 0.011904761904762,"selectivity": {"select":1,"out-of":84}},
       }
     },
     {
       "ssb_id": "4.1",
-      "sql_statement":"select d_year, c_nation, sum(lo_revenue-lo_supplycost) as profit1 from date_, customer, supplier, part, lineorder where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_partkey = p_partkey and lo_orderdate = d_datekey and c_region = 'AMERICA' and s_region = 'AMERICA' and (p_mfgr = 'MFGR#1' or p_mfgr = 'MFGR#2') group by d_year, c_nation order by d_year, c_nation; ",
+      "sql_statement":"select d_year, c_nation, sum(lo_revenue-lo_supplycost) as profit1 from date_, customer, supplier, part, lineorder where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_partkey = p_partkey and lo_orderdate = d_datekey and c_region = [REGION1-0] and s_region = [REGION2-0] and (p_mfgr = [MFGR-0] or p_mfgr = [MFGR-1]) group by d_year, c_nation order by d_year, c_nation; ",
       "parameters": {
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": }
+        "region1": { "value": ["AMERICA"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}},
+        "region2": { "value": ["AMERICA"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}},
+        "mfgr": { "value": ["MFGR#1","MFGR#2"], "domain": null, "filter-factor": 0.4,"selectivity": {"select":2,"out-of":5}}
       }
     },
     {
       "ssb_id": "4.2",
-      "sql_statement":"select d_year, s_nation, p_category, sum(lo_revenue-lo_supplycost) as profit1 from date_, customer, supplier, part, lineorder where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_partkey = p_partkey and lo_orderdate = d_datekey and c_region = 'AMERICA' and s_region = 'AMERICA' and (d_year = 1997 or d_year = 1998) and (p_mfgr = 'MFGR#1' or p_mfgr = 'MFGR#2') group by d_year, s_nation, p_category order by d_year, s_nation, p_category; ",
+      "sql_statement":"select d_year, s_nation, p_category, sum(lo_revenue-lo_supplycost) as profit1 from date_, customer, supplier, part, lineorder where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_partkey = p_partkey and lo_orderdate = d_datekey and c_region = [REGION1-0] and s_region = [REGION2-0] and (d_year = [YEAR-0] or d_year = [YEAR-1]) and (p_mfgr = [MFGR-0] or p_mfgr = [MFGR-1]) group by d_year, s_nation, p_category order by d_year, s_nation, p_category; ",
       "parameters": {
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": }
+        "region1": { "value": ["AMERICA"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}},
+        "region2": { "value": ["AMERICA"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}},
+        "year": { "value": [1997,1998], "domain": null, "filter-factor": 0.857142857142857,"selectivity": {"select":2,"out-of":7}},
+        "mfgr": { "value": ["MFGR#1","MFGR#2"], "domain": null, "filter-factor": 0.4,"selectivity": {"select":2,"out-of":5}}
       }
     },
     {
       "ssb_id": "4.3",
-      "sql_statement":"select d_year, s_city, p_brand1, sum(lo_revenue-lo_supplycost) as profit1 from date_, customer, supplier, part, lineorder where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_partkey = p_partkey and lo_orderdate = d_datekey and c_region = 'AMERICA' and s_nation = 'UNITED STATES' and (d_year = 1997 or d_year = 1998) and p_category = 'MFGR#14' group by d_year, s_city, p_brand1 order by d_year, s_city, p_brand1; ",
+      "sql_statement":"select d_year, s_city, p_brand1, sum(lo_revenue-lo_supplycost) as profit1 from date_, customer, supplier, part, lineorder where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_partkey = p_partkey and lo_orderdate = d_datekey and c_region = [REGION-0] and s_nation = [NATION-0] and (d_year = [YEAR-0] or d_year = [YEAR-1]) and p_category = [CATEGORY-0] group by d_year, s_city, p_brand1 order by d_year, s_city, p_brand1; ",
       "parameters": {
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": },
-        "": { "value": null, "domain": [] , "filter-factor": }
+        "region": { "value": ["AMERICA"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":1,"out-of":5}},
+        "nation": { "value": ["UNITED STATES"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
+        "year": { "value": [1997,1998], "domain": null, "filter-factor": 0.857142857142857,"selectivity": {"select":2,"out-of":7}},
+        "category": { "value": ["MFGR#14"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}}
       }
     }
   ]
