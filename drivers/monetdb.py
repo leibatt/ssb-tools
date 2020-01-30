@@ -24,9 +24,28 @@ class SSBDriver:
     conn = pymonetdb.connect(username=self.config["username"], password=self.config['password'], hostname=self.config["host"], port=self.config['port'], database=self.config['database-name'])
     return conn
 
+  def execute_query(self, query):
+    # get a connection from the pool - block if non is available
+    sql_statement = query
+    #logger.info("(%s) %s" % (request.ssb_id,sql_statement))
+    connection = self.pool.get()
+    cursor = connection.cursor()
+    cursor.execute(sql_statement)
+    data = cursor.fetchall()
+
+    # put connection back in the queue so the next thread can use it.
+    cursor.close()
+    self.pool.put(connection)
+
+    results = []
+    for row in data:
+      results.append(row)
+    return results
+
   def execute_request(self, request, result_queue, options):
     # get a connection from the pool - block if non is available
     sql_statement = request.sql_statement
+    #logger.info("(%s) %s" % (request.ssb_id,sql_statement))
     connection = self.pool.get()
     cursor = connection.cursor()
     request.start_time = util.get_current_ms_time()

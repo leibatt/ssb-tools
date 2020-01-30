@@ -53,6 +53,9 @@ class SSB:
       json_data = json.load(f)
       #self.workflow_queries = json_data["queries"]
       self.workflow_queries = populateAndRandomize(json_data)
+      self.workflow_queries = json_data["queries"]
+      for q in self.workflow_queries:
+        q["sql_statement"] = q["total-rows-query"]
 
     self.query_results = OrderedDict({ "args": vars(self.options), "results": deque() })
     self.benchmark_start_time = util.get_current_ms_time()

@@ -12,4 +12,5 @@
 # create the MonetDB database setup
 #./scripts/run_benchmark_queries.sh -H $host -d $database_name -p $port
 
-env/bin/python run_benchmark_queries.py --driver-name monetdb
+#env/bin/python run_benchmark_queries.py --driver-name monetdb
+env/bin/python query_randomizer.py --driver-name monetdb
