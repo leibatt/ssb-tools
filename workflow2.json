@@ -24,7 +24,7 @@
       "parameters": {
         "weeknuminyear": { "value": [6], "domain": null, "filter-factor": 0.019230769230769,"selectivity": {"select":1,"out-of":52}},
         "year": { "value": [1994], "domain": null, "filter-factor": 0.142857142857143,"selectivity": {"select":1,"out-of":7}},
-        "quantity": { "value": [36,40] , "domain": null, "filter-factor": 0.1},"selectivity": {"select":5,"out-of":50},
+        "quantity": { "value": [36,40] , "domain": null, "filter-factor": 0.1,"selectivity": {"select":5,"out-of":50}},
         "discount": { "value": [6,6], "domain": null, "filter-factor": 0.272727272727273,"selectivity": {"select":3,"out-of":11}}
       }
     },

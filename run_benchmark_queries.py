@@ -10,6 +10,7 @@ from queue import Empty
 from collections import OrderedDict,deque
 from optparse import OptionParser
 from request import SqlRequest
+from query_randomizer import populateAndRandomize
 import logging
 
 import util
@@ -50,7 +51,8 @@ class SSB:
   def run(self):
     with open(self.get_workflow_path()) as f:
       json_data = json.load(f)
-      self.workflow_queries = json_data["queries"]
+      #self.workflow_queries = json_data["queries"]
+      self.workflow_queries = populateAndRandomize(json_data)
 
     self.query_results = OrderedDict({ "args": vars(self.options), "results": deque() })
     self.benchmark_start_time = util.get_current_ms_time()
