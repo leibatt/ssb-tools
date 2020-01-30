@@ -31,6 +31,7 @@ class SSB:
     (self.options, args) = parser.parse_args()
     if not self.options.driver_name:
       parser.error("No driver name specified.")
+    self.ssb_config = json.load(open("ssb.config.json"))
 
     self.setup()
     self.run()
@@ -123,7 +124,7 @@ class SSB:
     request.delivered = True
 
   def get_workflow_path(self):
-    return "workflow.json"
+    return self.ssb_config["workflow-file"]
 
 if __name__ == "__main__":
   SSB()

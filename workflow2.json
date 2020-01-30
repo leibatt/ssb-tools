@@ -89,7 +89,7 @@
         "city2": { "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}},
         "nation1": { "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
         "nation2": { "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}},
-        "yearmonth": { "value": ["Dec1997"], "domain": null, "filter-factor": 0.011904761904762,"selectivity": {"select":1,"out-of":84}},
+        "yearmonth": { "value": ["Dec1997"], "domain": null, "filter-factor": 0.011904761904762,"selectivity": {"select":1,"out-of":84}}
       }
     },
     {
