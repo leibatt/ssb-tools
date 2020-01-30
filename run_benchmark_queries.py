@@ -105,6 +105,7 @@ class SSB:
         "args": self.query_results["args"],
         "results": list(self.query_results["results"])
       })
+      res["workflow-start-time"] = self.workflow_start_time
       json.dump(res, fp, indent=4)
 
   def deliver_request(self, request):
