@@ -1,6 +1,8 @@
 #!/bin/bash
 
-data_folder="/scratch1/leilani/code/ssb-tools-fork/generated_data"
+ssb_config="ssb.config.json"
+data_folder=`python -c "import sys, json; print(json.load(open(\"${ssb_config}\"))['data-folder'])"`
+scale_factor=`python -c "import sys, json; print(json.load(open(\"${ssb_config}\"))['scale-factor'])"`
 
 # get config info from the monetdb config file
 monetdb_config="monetdb.config.json"
@@ -8,7 +10,6 @@ dbfarm_location=`python -c "import sys, json; print(json.load(open(\"${monetdb_c
 port=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['port'])"`
 log_name=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['log-name'])"`
 database_name=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['database-name'])"`
-scale_factor=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['scale-factor'])"`
 
 # reset the data generation
 rm -r $data_folder
