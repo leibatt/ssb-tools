@@ -18,12 +18,6 @@ import random
 import util
 
 import random
-logging.basicConfig(filename='output.log', level=logging.INFO)
-logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-logger = logging.getLogger("ssb")
-logger.addHandler(consoleHandler)
 
 
 
@@ -323,4 +317,10 @@ class QueryRandomizer:
 
 if __name__ == "__main__":
   QueryRandomizer()
+  logging.basicConfig(filename='output.log', level=logging.INFO)
+  logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+  consoleHandler = logging.StreamHandler()
+  consoleHandler.setFormatter(logFormatter)
+  logger = logging.getLogger("ssb")
+  logger.addHandler(consoleHandler)
 

@@ -10,7 +10,7 @@ from queue import Empty
 from collections import OrderedDict,deque
 from optparse import OptionParser
 from request import SqlRequest
-from query_randomizer import populateAndRandomize
+from query_randomizer import generateFinalQueries
 import logging
 
 import util
@@ -50,12 +50,9 @@ class SSB:
 
   def run(self):
     with open(self.get_workflow_path()) as f:
-      json_data = json.load(f)
+      self.workflow = json.load(f)
       #self.workflow_queries = json_data["queries"]
-      self.workflow_queries = populateAndRandomize(json_data)
-      self.workflow_queries = json_data["queries"]
-      for q in self.workflow_queries:
-        q["sql_statement"] = q["total-rows-query"]
+      #self.workflow_queries = populateAndRandomize(json_data)
 
     self.query_results = OrderedDict({ "args": vars(self.options), "results": deque() })
     self.benchmark_start_time = util.get_current_ms_time()
@@ -66,6 +63,8 @@ class SSB:
     except AttributeError:
       pass
 
+    self.workflow = generateFinalQueries(self.workflow,self.driver)
+    self.workflow_queries = self.workflow["queries"]
     total_queries = len(self.workflow_queries)
     global total_processed
     total_processed = 0
