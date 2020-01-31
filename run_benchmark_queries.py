@@ -1,3 +1,4 @@
+import random
 import importlib
 import json
 import csv
@@ -64,7 +65,10 @@ class SSB:
       pass
 
     self.workflow = generateFinalQueries(self.workflow,self.driver)
-    self.workflow_queries = self.workflow["queries"]
+    self.workflow_queries = list(self.workflow["queries"])
+    # randomize the order
+    random.shuffle(self.workflow_queries)
+
     total_queries = len(self.workflow_queries)
     global total_processed
     total_processed = 0
@@ -89,7 +93,7 @@ class SSB:
     for query_id,query in enumerate(self.workflow_queries):
       request = SqlRequest(query_id,query)
       self.driver.process_request(request, SSB.result_queue, self.options)
-      #time.sleep(0.002) # so the request threads do not overwhelm some of the drivers (particularly verdictdb)
+      time.sleep(0.002) # so the request threads do not overwhelm some of the drivers (particularly verdictdb)
  
     thread.join()
     self.end_run()
