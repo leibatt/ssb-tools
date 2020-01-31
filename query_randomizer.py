@@ -94,7 +94,6 @@ def selectForEqual(attributeId,query,uniqueValues,totalRows,selected,driver,logg
   if u is not None:
     uniqueValues = u
 
-  #print(uniqueValues)
   index = random.randint(0,len(uniqueValues)-1)
   tup = uniqueValues[index]
   return [tup[0]]
@@ -106,10 +105,8 @@ def selectForBetween(attributeId,query,uniqueValues,totalRows,selected,driver,lo
 
   selectivity = query["parameters"][attributeId]["selectivity"]
   breadth = int(max(1,math.floor(1.0*selectivity["select"]*len(uniqueValues)/selectivity["out-of"])))
-  #print("breadth: ",breadth)
   maxStart = len(uniqueValues) - breadth
   start = random.randint(0,maxStart)
-  #return [v[0] for v in uniqueValues[start:start+breadth]]
   return [uniqueValues[start][0],uniqueValues[start+breadth-1][0]]
 
 def selectForLessThan(attributeId,query,uniqueValues,totalRows,selected,driver,logger):
@@ -120,7 +117,6 @@ def selectForLessThan(attributeId,query,uniqueValues,totalRows,selected,driver,l
   selectivity = query["parameters"][attributeId]["selectivity"]
   index = int(1.0*selectivity["select"]*(len(uniqueValues)-1)/selectivity["out-of"])
   return [uniqueValues[index][0]]
-  #return None
 
 def selectForBetweenEqual(attributeId,query,uniqueValues,totalRows,selected,driver,logger):
   u = updateUniqueValues(attributeId,query,selected,driver,logger)
@@ -138,7 +134,6 @@ def selectForIn(attributeId,query,uniqueValues,totalRows,selected,driver,logger)
     
   selectivity = query["parameters"][attributeId]["selectivity"]
   total = int(max(1,math.floor(1.0*selectivity["select"]*len(uniqueValues)/selectivity["out-of"])))
-  #print("total:",total)
   indexes = list(range(0,len(uniqueValues)))
   random.shuffle(indexes)
   return [uniqueValues[i][0] for i in indexes[:total]]
@@ -193,7 +188,6 @@ def checkQuerySelectivities(workflow,driver,logger):
     sq = getSelectivityQuery(query)
     res = driver.execute_query(sq)
     ct = res[0][0]
-    #print("ct:",ct)
     newsel=1.0*ct/totalRows
     oldsel = 1.0
     for attributeId in query["parameters"]:
@@ -201,30 +195,11 @@ def checkQuerySelectivities(workflow,driver,logger):
       oldsel = oldsel * selectivity["select"]/selectivity["out-of"]
     query["final-selectivity"] = newsel
     query["original-selectivity"] = oldsel
-    diff = abs(newsel-oldsel)
+    diff = newsel-oldsel
     diff_adj = diff/(oldsel)
     #logger.info("final query: %s" % (query["sql_statement"]))
     #logger.info("\tselectivity query: %s" % (sq))
-    logger.info("\tcount: %d, total: %d, selectivity: %f, old selectivity: %f, difference: %f, normalized difference: %f" % (ct,totalRows,newsel,oldsel,diff,diff_adj))
-
-'''
-def checkQuerySelectivityOld(driver,selectedVals,attributeId,selType,query,totalRows):
-  selectivity = query["parameters"][attributeId]["selectivity"]
-  attributeName = query["parameters"][attributeId]["attribute_name"]
-  baseQuery = query["base-query"].replace("[ATTRIBUTES]","count(*)").replace(";","")
-  if "where" in baseQuery:
-    baseQuery = baseQuery + " and " + buildPredicate(selectedVals,selType,attributeName) + ";"
-  else:
-    baseQuery = baseQuery + " where " + buildPredicate(selectedVals,selType,attributeName) + ";"
-  print("baseQuerySelectivityCheck",baseQuery)
-  res = driver.execute_query(baseQuery)
-  ct = res[0][0]
-  newsel=1.0*ct/totalRows
-  oldsel=1.0*selectivity["select"]/selectivity["out-of"]
-  diff = abs(newsel-oldsel)
-  diff_adj = diff/(oldsel)
-  print("attributeName:",attributeName,"count:",ct,"total:",totalRows,"selectivity:",1.0*ct/totalRows,"old selectivity:",1.0*selectivity["select"]/selectivity["out-of"],"difference:",diff,"normalized difference:",diff_adj)
-'''
+    logger.info("SSB query id: %s, count: %d, total: %d, selectivity: %f, old selectivity: %f, difference: %f, normalized difference: %f" % (query["ssb_id"],ct,totalRows,newsel,oldsel,diff,diff_adj))
 
 def generateFinalQueries(workflow,driver,logger):
   for query_id,query in enumerate(workflow["queries"]):
