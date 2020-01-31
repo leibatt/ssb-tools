@@ -14,6 +14,7 @@ export DOTMONETDBFILE="${current_dir}/.monetdb"
 monetdb_config="${root_dir}/monetdb.config.json"
 # get the location to put the dbfarm
 database_name=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['database-name'])"`
+username=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['username'])"`
 
 # create the tables
 mclient -d $database_name < $current_dir/../createTables.sql
