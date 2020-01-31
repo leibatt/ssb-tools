@@ -22,12 +22,6 @@ def randomizeQueries(queries):
   random.shuffle(ordering)
   return ordering
 
-# generate a proper sql statement for all queries in the workflow
-def populateAllQueries(queries):
-  for query in queries:
-    populateQuery(query)
-  return queries
-
 # generate a proper sql statement
 def populateQueryWithOriginalValues(query):
   sql = query["sql_statement"]
@@ -74,9 +68,9 @@ def updateUniqueValues(attributeId,query,selected,driver,logger):
       dst = query["parameters"][d]["selection-type"]
       baseQuery = baseQuery + " and " + buildPredicate(selected[d],dst,dname)
     baseQuery = baseQuery + " group by " +attributeName+ " order by " +attributeName+ " asc;"
-    print(baseQuery)
+    #logger.info(baseQuery)
     uniqueValues = driver.execute_query(baseQuery)
-    print(uniqueValues)
+    #logger.info(uniqueValues)
     return uniqueValues
   return None
 
@@ -176,8 +170,45 @@ def buildPredicate(selectedVals,selType,attributeName):
       return attributeName + " between '" + str(selectedVals[0]-1) + "' and '" + str(selectedVals[0]+1) + "'"
     else: # default
       return None
- 
-def checkQuerySelectivity(driver,selectedVals,attributeId,selType,query,totalRows):
+
+def getSelectivityQuery(query):
+  baseQuery = query["base-query"].replace("[ATTRIBUTES]","count(*)").replace(";","")
+  selections = query["final-selections"]
+  for attributeId in selections:
+    attributeName = query["parameters"][attributeId]["attribute_name"]
+    selType = query["parameters"][attributeId]["selection-type"]
+    if "where" in baseQuery:
+      baseQuery = baseQuery + " and " + buildPredicate(selections[attributeId],selType,attributeName)
+    else:
+      baseQuery = baseQuery + " where " + buildPredicate(selections[attributeId],selType,attributeName) + ";"
+  baseQuery = baseQuery + ";"
+  return baseQuery
+
+def checkQuerySelectivities(workflow,driver,logger):
+  trq = getTotalRowsQuery(workflow["queries"][0])
+  res = driver.execute_query(trq)
+  totalRows = res[0][0]
+
+  for query in workflow["queries"]:
+    sq = getSelectivityQuery(query)
+    res = driver.execute_query(sq)
+    ct = res[0][0]
+    #print("ct:",ct)
+    newsel=1.0*ct/totalRows
+    oldsel = 1.0
+    for attributeId in query["parameters"]:
+      selectivity = query["parameters"][attributeId]["selectivity"]
+      oldsel = oldsel * selectivity["select"]/selectivity["out-of"]
+    query["final-selectivity"] = newsel
+    query["original-selectivity"] = oldsel
+    diff = abs(newsel-oldsel)
+    diff_adj = diff/(oldsel)
+    #logger.info("final query: %s" % (query["sql_statement"]))
+    #logger.info("\tselectivity query: %s" % (sq))
+    logger.info("\tcount: %d, total: %d, selectivity: %f, old selectivity: %f, difference: %f, normalized difference: %f" % (ct,totalRows,newsel,oldsel,diff,diff_adj))
+
+'''
+def checkQuerySelectivityOld(driver,selectedVals,attributeId,selType,query,totalRows):
   selectivity = query["parameters"][attributeId]["selectivity"]
   attributeName = query["parameters"][attributeId]["attribute_name"]
   baseQuery = query["base-query"].replace("[ATTRIBUTES]","count(*)").replace(";","")
@@ -193,6 +224,7 @@ def checkQuerySelectivity(driver,selectedVals,attributeId,selType,query,totalRow
   diff = abs(newsel-oldsel)
   diff_adj = diff/(oldsel)
   print("attributeName:",attributeName,"count:",ct,"total:",totalRows,"selectivity:",1.0*ct/totalRows,"old selectivity:",1.0*selectivity["select"]/selectivity["out-of"],"difference:",diff,"normalized difference:",diff_adj)
+'''
 
 def generateFinalQueries(workflow,driver,logger):
   for query_id,query in enumerate(workflow["queries"]):
@@ -232,8 +264,8 @@ def generateFinalQuery(query_id,query,driver,logger):
       predicates.append(buildPredicate(sel,selType,attributeName))
 
     # selected object has all selections for each attribute. Now we can build the final query
+    query["final-selections"] = selected
     finalQuery=populateQueryWithSelections(query,selected)
-    #print(finalQuery["sql_statement"])
 
 class QueryRandomizer:
   def __init__(self):
@@ -272,8 +304,11 @@ class QueryRandomizer:
     except AttributeError:
       pass
 
+    # generate the queries
     generateFinalQueries(self.workflow,self.driver,logger)
 
+    # check selectivities
+    checkQuerySelectivities(self.workflow,self.driver,logger)
     self.end_run()
 
   def end_run(self):
