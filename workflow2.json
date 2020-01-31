@@ -2,16 +2,16 @@
   "queries": [
     {
       "ssb_id": "1.1",
-      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_year = [YEAR-0] and lo_discount between [DISCOUNT-0] - 1 and [DISCOUNT-1] + 1 and lo_quantity < [QUANTITY-0];",
+      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_year = [YEAR-0] and lo_discount between ([DISCOUNT-0] - 1) and ([DISCOUNT-1] + 1) and lo_quantity < [QUANTITY-0];",
       "parameters": {
         "year": { "attribute_name": "d_year", "table_name": "date_", "value": [1993], "domain": [1993,1997] , "filter-factor": 0.1428571428571429,"selectivity": {"select":1,"out-of":7}, "filter-predicate":"d_year = [YEAR-0]","selection-type":"equal"},
         "quantity":  { "attribute_name": "lo_quantity", "table_name": "lineorder", "value": [25], "domain": [24,25], "filter-factor": 0.47,"selectivity": {"select":25,"out-of":50}, "filter-predicate":"lo_quantity < [QUANTITY-0]","selection-type":"less-than"},
-        "discount":  { "attribute_name": "lo_discount", "table_name": "lineorder", "value": [2,2], "domain": [2,9], "filter-factor": 0.272727272727273,"selectivity": {"select":3,"out-of":11}, "filter-predicate":"lo_discount between [DISCOUNT-0] - 1 and [DISCOUNT-1] + 1","selection-type":"between-equal"}
+        "discount":  { "attribute_name": "lo_discount", "table_name": "lineorder", "value": [2,2], "domain": [2,9], "filter-factor": 0.272727272727273,"selectivity": {"select":3,"out-of":11}, "filter-predicate":"lo_discount between ([DISCOUNT-0] - 1) and ([DISCOUNT-1] + 1)","selection-type":"between-equal"}
       }, "base-query": "select [ATTRIBUTES] from lineorder, date_ where lo_orderdate = d_datekey;"
     },
     {
       "ssb_id": "1.2",
-      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_yearmonthnum = [YEARMONTHNUM-0] and lo_discount between [DISCOUNT-0]-1 and [DISCOUNT-1]+1 and lo_quantity between [QUANTITY-0] and [QUANTITY-1];",
+      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_yearmonthnum = [YEARMONTHNUM-0] and lo_discount between ([DISCOUNT-0]-1) and ([DISCOUNT-1]+1) and lo_quantity between [QUANTITY-0] and [QUANTITY-1];",
       "parameters": {
         "yearmonthnum": { "attribute_name": "d_yearmonthnum", "table_name": "date_", "value": [199401], "domain": null, "filter-factor": 0.011904761904762,"selectivity": {"select":1,"out-of":84}, "filter-predicate":"d_yearmonthnum = [YEARMONTHNUM-0]","selection-type":"equal"},
         "discount": { "attribute_name": "lo_discount", "table_name": "lineorder", "value": [5,5], "domain": null, "filter-factor": 0.272727272727273,"selectivity": {"select":3,"out-of":11}, "filter-predicate":"lo_discount between [DISCOUNT-0]-1 and [DISCOUNT-1]+1","selection-type":"between-equal"},
@@ -20,7 +20,7 @@
     },
     {
       "ssb_id": "1.3",
-      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_weeknuminyear = [WEEKNUMINYEAR-0] and d_year = [YEAR-0] and lo_discount between [DISCOUNT-0]-1 and [DISCOUNT-1]+1 and lo_quantity between [QUANTITY-0] and [QUANTITY-1];",
+      "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_weeknuminyear = [WEEKNUMINYEAR-0] and d_year = [YEAR-0] and lo_discount between ([DISCOUNT-0]-1) and ([DISCOUNT-1]+1) and lo_quantity between [QUANTITY-0] and [QUANTITY-1];",
       "parameters": {
         "weeknuminyear": { "attribute_name": "d_weeknuminyear", "table_name": "date_", "value": [6], "domain": null, "filter-factor": 0.019230769230769,"selectivity": {"select":1,"out-of":52}, "filter-predicate":"d_weeknuminyear = [WEEKNUMINYEAR-0]","selection-type":"equal"},
         "year": { "attribute_name": "d_year", "table_name": "date_", "value": [1994], "domain": null, "filter-factor": 0.142857142857143,"selectivity": {"select":1,"out-of":7}, "filter-predicate":"d_year = [YEAR-0]","selection-type":"equal"},
@@ -74,11 +74,11 @@
       "ssb_id": "3.3",
       "sql_statement":"select c_city, s_city, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_nation = '[NATION1-0]' and (c_city='[CITY1-0]' or c_city='[CITY1-1]') and (s_city='[CITY2-0]' or s_city='[CITY2-1]') and s_nation = '[NATION2-0]' and d_year >= [YEAR-0] and d_year <= [YEAR-1] group by c_city, s_city, d_year order by d_year asc, revenue desc; ",
       "parameters": {
-        "city1": { "attribute_name": "c_city", "table_name": "customer", "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}, "filter-predicate":"(c_city='[CITY1-0]' or c_city='[CITY1-1]')","selection-type":"in"},
-        "city2": { "attribute_name": "s_city", "table_name": "supplier", "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}, "filter-predicate":"(s_city='[CITY2-0]' or s_city='[CITY2-1]')","selection-type":"in"},
         "nation1": { "attribute_name": "c_nation", "table_name": "customer", "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}, "filter-predicate":"c_nation = '[NATION1-0]'","selection-type":"equal"},
         "nation2": { "attribute_name": "s_nation", "table_name": "supplier", "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}, "filter-predicate":"s_nation = '[NATION2-0]'","selection-type":"equal"},
-        "year": { "attribute_name": "d_year", "table_name": "date_", "value": [1992,1997], "domain": null, "filter-factor": 0.857142857142857,"selectivity": {"select":6,"out-of":10}, "filter-predicate":"d_year >= [YEAR-0] and d_year <= [YEAR-1]","selection-type":"between"}
+        "city1": { "attribute_name": "c_city", "table_name": "customer", "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}, "filter-predicate":"(c_city='[CITY1-0]' or c_city='[CITY1-1]')","selection-type":"in","depends":["nation1"]},
+        "city2": { "attribute_name": "s_city", "table_name": "supplier", "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}, "filter-predicate":"(s_city='[CITY2-0]' or s_city='[CITY2-1]')","selection-type":"in","depends":["nation2"]},
+        "year": { "attribute_name": "d_year", "table_name": "date_", "value": [1992,1997], "domain": null, "filter-factor": 0.857142857142857,"selectivity": {"select":6,"out-of":7}, "filter-predicate":"d_year >= [YEAR-0] and d_year <= [YEAR-1]","selection-type":"between"}
       }, "base-query": "select [ATTRIBUTES] from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey;"
     },
     {
@@ -86,9 +86,9 @@
       "sql_statement":"select c_city, s_city, d_year, sum(lo_revenue) as revenue from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey and c_nation = '[NATION1-0]' and (c_city='[CITY1-0]' or c_city='[CITY1-1]') and (s_city='[CITY2-0]' or s_city='[CITY2-1]') and s_nation = '[NATION2-0]' and d_yearmonth = '[YEARMONTH-0]' group by c_city, s_city, d_year order by d_year asc, revenue desc; ",
       "parameters": {
         "nation1": { "attribute_name": "c_nation", "table_name": "customer", "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}, "filter-predicate":"c_nation = '[NATION1-0]'","selection-type":"equal"},
-        "city1": { "attribute_name": "c_city", "table_name": "customer", "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}, "filter-predicate":"(c_city='[CITY1-0]' or c_city='[CITY1-1]')","selection-type":"in"},
-        "city2": { "attribute_name": "s_city", "table_name": "supplier", "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}, "filter-predicate":"(s_city='[CITY2-0]' or s_city='[CITY2-1]')","selection-type":"in"},
         "nation2": { "attribute_name": "s_nation", "table_name": "supplier", "value": ["UNITED KINGDOM"], "domain": null, "filter-factor": 0.04,"selectivity": {"select":1,"out-of":25}, "filter-predicate":"s_nation = '[NATION2-0]'","selection-type":"equal"},
+        "city1": { "attribute_name": "c_city", "table_name": "customer", "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}, "filter-predicate":"(c_city='[CITY1-0]' or c_city='[CITY1-1]')","selection-type":"in","depends":["nation1"]},
+        "city2": { "attribute_name": "s_city", "table_name": "supplier", "value": ["UNITED KI1","UNITED KI5"], "domain": null, "filter-factor": 0.2,"selectivity": {"select":2,"out-of":10}, "filter-predicate":"(s_city='[CITY2-0]' or s_city='[CITY2-1]')","selection-type":"in","depends":["nation2"]},
         "yearmonth": { "attribute_name": "d_yearmonth", "table_name": "date_", "value": ["Dec1997"], "domain": null, "filter-factor": 0.011904761904762,"selectivity": {"select":1,"out-of":84}, "filter-predicate":"d_yearmonth = '[YEARMONTH-0]'","selection-type":"equal"}
       }, "base-query": "select [ATTRIBUTES] from customer, lineorder, supplier, date_ where lo_custkey = c_custkey and lo_suppkey = s_suppkey and lo_orderdate = d_datekey;"
     },

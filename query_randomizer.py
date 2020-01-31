@@ -1,3 +1,4 @@
+import numbers
 import math
 import importlib
 import json
@@ -12,6 +13,7 @@ from collections import OrderedDict,deque
 from optparse import OptionParser
 from request import SqlRequest
 import logging
+import random
 
 import util
 
@@ -48,8 +50,21 @@ def populateQuery(query):
   sql = query["sql_statement"]
   for p in query["parameters"]:
     pu = p.upper()
-    print(p,query["parameters"].keys())
+    #print(p,query["parameters"].keys())
     values = query["parameters"][p]["value"]
+    for i,v in enumerate(values):
+      k = "".join(["[",pu,"-",str(i),"]"])
+      sql = sql.replace(k,str(v))
+  query["sql_statement_old"] = query["sql_statement"]
+  query["sql_statement"] = sql
+  return query
+
+def populateQueryWithSelections(query,selections):
+  sql = query["sql_statement"]
+  for p in query["parameters"]:
+    pu = p.upper()
+    #print(p,query["parameters"].keys())
+    values = selections[p]
     for i,v in enumerate(values):
       k = "".join(["[",pu,"-",str(i),"]"])
       sql = sql.replace(k,str(v))
@@ -63,10 +78,157 @@ def getTotalRowsQuery(query):
 def getCardinalityQuery(attributeId, query):
   attributeName = query["parameters"][attributeId]["attribute_name"]
   base = query["base-query"].replace("[ATTRIBUTES]",",".join([attributeName,"count(*)"])).replace(";","")
-  return base + " group by " + attributeName + ";"
+  return base + " group by " + attributeName + " order by " + attributeName + " asc;"
+
+def createSelection(attributeId,query,uniqueValues,totalRows,selected,driver):
+  selType = query["parameters"][attributeId]["selection-type"]
+  if selType == "equal":
+    return selectForEqual(attributeId,query,uniqueValues,totalRows)
+  elif selType == "between":
+    return selectForBetween(attributeId,query,uniqueValues,totalRows)
+  elif selType == "less-than":
+    return selectForLessThan(attributeId,query,uniqueValues,totalRows)
+  elif selType == "in":
+    return selectForIn(attributeId,query,uniqueValues,totalRows,selected,driver)
+  elif selType == "between-equal":
+    return selectForBetweenEqual(attributeId,query,uniqueValues,totalRows)
+  else: # default
+    return None
+
+def selectForEqual(attributeId,query,uniqueValues,totalRows):
+  #print(uniqueValues)
+  index = random.randint(0,len(uniqueValues)-1)
+  tup = uniqueValues[index]
+  return [tup[0]]
+
+def selectForBetween(attributeId,query,uniqueValues,totalRows):
+  selectivity = query["parameters"][attributeId]["selectivity"]
+  breadth = int(max(1,math.floor(1.0*selectivity["select"]*len(uniqueValues)/selectivity["out-of"])))
+  #print("breadth: ",breadth)
+  maxStart = len(uniqueValues) - breadth
+  start = random.randint(0,maxStart)
+  #return [v[0] for v in uniqueValues[start:start+breadth]]
+  return [uniqueValues[start][0],uniqueValues[start+breadth-1][0]]
+
+def selectForLessThan(attributeId,query,uniqueValues,totalRows):
+  selectivity = query["parameters"][attributeId]["selectivity"]
+  index = int(1.0*selectivity["select"]*(len(uniqueValues)-1)/selectivity["out-of"])
+  return [uniqueValues[index][0]]
+  #return None
+
+def selectForBetweenEqual(attributeId,query,uniqueValues,totalRows):
+  index = random.randint(1,len(uniqueValues)-2)
+  return [uniqueValues[index][0],uniqueValues[index][0]]
+
+def selectForIn(attributeId,query,uniqueValues,totalRows,selected,driver):
+  # only matters for city attributes
+  if "depends" in query["parameters"][attributeId]: # take other predicates into account:
+    dependsOn = query["parameters"][attributeId]["depends"]
+    attributeName = query["parameters"][attributeId]["attribute_name"]
+    baseQuery = query["base-query"].replace("[ATTRIBUTES]",attributeName+", count(*)").replace(";","")
+    for d in dependsOn:
+      dname = query["parameters"][d]["attribute_name"]
+      dst = query["parameters"][d]["selection-type"]
+      baseQuery = baseQuery + " and " + buildPredicate(selected[d],dst,dname)
+    baseQuery = baseQuery + " group by " +attributeName+ " order by " +attributeName+ " asc;"
+    print(baseQuery)
+    uniqueValues = driver.execute_query(baseQuery)
+    print(uniqueValues)
+    
+  selectivity = query["parameters"][attributeId]["selectivity"]
+  total = int(max(1,math.floor(1.0*selectivity["select"]*len(uniqueValues)/selectivity["out-of"])))
+  #print("total:",total)
+  indexes = list(range(0,len(uniqueValues)))
+  random.shuffle(indexes)
+  return [uniqueValues[i][0] for i in indexes[:total]]
+
+def buildPredicate(selectedVals,selType,attributeName):
+  if isinstance(selectedVals[0], numbers.Number):
+    if selType == "equal":
+      return attributeName + " = " + str(selectedVals[0])
+    elif selType == "between":
+      return attributeName + " between " + str(selectedVals[0]) + " and " + str(selectedVals[1])
+    elif selType == "less-than":
+      return attributeName + " < " + str(selectedVals[0])
+    elif selType == "in":
+      return "(" + " or ".join([attributeName +" = "+str(sv) for sv in selectedVals])+ ")"
+    elif selType == "between-equal":
+      return attributeName + " between " + str(selectedVals[0]-1) + " and " + str(selectedVals[0]+1)
+    else: # default
+      return None
+  else:
+    if selType == "equal":
+      return attributeName + " = '" + str(selectedVals[0]) + "'"
+    elif selType == "between":
+      return attributeName + " between '" + str(selectedVals[0]) + "' and '" + str(selectedVals[1]) + "'"
+    elif selType == "less-than":
+      return attributeName + " < '" + str(selectedVals[0]) + "'"
+    elif selType == "in":
+      return "(" + " or ".join([attributeName +" = '"+str(sv) + "'" for sv in selectedVals])+ ")"
+    elif selType == "between-equal":
+      return attributeName + " between '" + str(selectedVals[0]-1) + "' and '" + str(selectedVals[0]+1) + "'"
+    else: # default
+      return None
+ 
+def checkQuerySelectivity(driver,selectedVals,attributeId,selType,query,totalRows):
+  selectivity = query["parameters"][attributeId]["selectivity"]
+  attributeName = query["parameters"][attributeId]["attribute_name"]
+  baseQuery = query["base-query"].replace("[ATTRIBUTES]","count(*)").replace(";","")
+  if "where" in baseQuery:
+    baseQuery = baseQuery + " and " + buildPredicate(selectedVals,selType,attributeName) + ";"
+  else:
+    baseQuery = baseQuery + " where " + buildPredicate(selectedVals,selType,attributeName) + ";"
+  print("baseQuerySelectivityCheck",baseQuery)
+  res = driver.execute_query(baseQuery)
+  ct = res[0][0]
+  newsel=1.0*ct/totalRows
+  oldsel=1.0*selectivity["select"]/selectivity["out-of"]
+  diff = abs(newsel-oldsel)
+  diff_adj = diff/(oldsel)
+  print("attributeName:",attributeName,"count:",ct,"total:",totalRows,"selectivity:",1.0*ct/totalRows,"old selectivity:",1.0*selectivity["select"]/selectivity["out-of"],"difference:",diff,"normalized difference:",diff_adj)
+
+def generateFinalQueries(workflow,driver):
+  for query_id,query in enumerate(workflow["queries"]):
+    generateFinalQuery(query_id,query,driver)
+  return workflow
+
+def generateFinalQuery(query_id,query,driver):
+    # get total rows
+    trq = getTotalRowsQuery(query)
+    res = driver.execute_query(trq)
+    totalRows = res[0][0]
+    #logger.info("query: '%s', result: %d" % (trq,res[0][0]))
+
+    # find correct selectivity
+    selected = {}
+    predicates = []
+    for attributeId in query["parameters"]:
+      selectivity = query["parameters"][attributeId]["selectivity"]
+      cq = getCardinalityQuery(attributeId,query)
+      uniqueValues = driver.execute_query(cq)
+      totalUnique = len(uniqueValues)
+      #logger.info("query: '%s', result: %d" % (cq,res[0][0]))
+      totalSelections = int(math.ceil(1.0 * selectivity["select"] / selectivity["out-of"] * totalUnique))
+
+      #pick random values
+      #logger.info("query: '%s', unique vals for attr '%s': %d, total selections: %d" % (cq,attributeId,totalUnique,totalSelections))
+      #print(uniqueValues)
+      sel = createSelection(attributeId,query,uniqueValues,totalRows,selected,driver)
+      selected[attributeId]=sel
+      selType = query["parameters"][attributeId]["selection-type"]
+      attributeName = query["parameters"][attributeId]["attribute_name"]
+      #print(query)
+      #print(uniqueValues)
+      print(sel)
+      #scheck=checkQuerySelectivity(self.driver,sel,attributeId,selType,query,totalRows) 
+      #print(scheck)
+      predicates.append(buildPredicate(sel,selType,attributeName))
+
+    # selected object has all selections for each attribute. Now we can build the final query
+    finalQuery=populateQueryWithSelections(query,selected)
+    print(finalQuery["sql_statement"])
 
 class QueryRandomizer:
-  new_workflow = {}
   def __init__(self):
     parser = OptionParser()
     parser.add_option("--driver-name", dest="driver_name", action="store", help="Driver name")
@@ -102,9 +264,8 @@ class QueryRandomizer:
     except AttributeError:
       pass
 
-    self.new_workflow = dict(self.workflow)
-    #total_queries = len(self.workflow["queries"])
-
+    generateFinalQueries(self.workflow,self.driver)
+    '''
     for query_id,query in enumerate(self.workflow["queries"]):
       # get total rows
       trq = getTotalRowsQuery(query)
@@ -113,15 +274,35 @@ class QueryRandomizer:
       #logger.info("query: '%s', result: %d" % (trq,res[0][0]))
 
       # find correct selectivity
-      for attrId in query["parameters"]:
-        selectivity = query["parameters"][attrId]["selectivity"]
-        cq = getCardinalityQuery(attrId,query)
-        res = self.driver.execute_query(cq)
-        uniqueVals = len(res)
+      selected = {}
+      predicates = []
+      for attributeId in query["parameters"]:
+        selectivity = query["parameters"][attributeId]["selectivity"]
+        cq = getCardinalityQuery(attributeId,query)
+        uniqueValues = self.driver.execute_query(cq)
+        totalUnique = len(uniqueValues)
         #logger.info("query: '%s', result: %d" % (cq,res[0][0]))
-        totalSelections = int(math.ceil(1.0 * selectivity["select"] / selectivity["out-of"] * uniqueVals))
-        logger.info("query: '%s', unique vals for attr '%s': %d, total selections: %d" % (cq,attrId,uniqueVals,totalSelections))
- 
+        totalSelections = int(math.ceil(1.0 * selectivity["select"] / selectivity["out-of"] * totalUnique))
+
+        #pick random values
+        #logger.info("query: '%s', unique vals for attr '%s': %d, total selections: %d" % (cq,attributeId,totalUnique,totalSelections))
+        #print(uniqueValues)
+        sel = createSelection(attributeId,query,uniqueValues,totalRows,selected,self.driver)
+        selected[attributeId]=sel
+        selType = query["parameters"][attributeId]["selection-type"]
+        attributeName = query["parameters"][attributeId]["attribute_name"]
+        #print(query)
+        #print(uniqueValues)
+        print(sel)
+        #scheck=checkQuerySelectivity(self.driver,sel,attributeId,selType,query,totalRows) 
+        #print(scheck)
+        predicates.append(buildPredicate(sel,selType,attributeName))
+
+      # selected object has all selections for each attribute. Now we can build the final query
+      finalQuery=populateQueryWithSelections(query,selected)
+      print(finalQuery["sql_statement"])
+    '''
+
     self.end_run()
 
   def end_run(self):
@@ -135,7 +316,7 @@ class QueryRandomizer:
     path = self.get_workflow_path()+".generated"
     logger.info("saving results to %s" % path)
     with open(path, "w") as fp:
-      json.dump(self.new_workflow, fp, indent=4)
+      json.dump(self.workflow, fp, indent=4)
 
   def get_workflow_path(self):
     return self.ssb_config["workflow-file"]
