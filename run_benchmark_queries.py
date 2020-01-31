@@ -11,7 +11,7 @@ from queue import Empty
 from collections import OrderedDict,deque
 from optparse import OptionParser
 from request import SqlRequest
-from query_randomizer import generateFinalQueries
+from query_randomizer import randomizeQueries
 import logging
 
 import util
@@ -52,8 +52,6 @@ class SSB:
   def run(self):
     with open(self.get_workflow_path()) as f:
       self.workflow = json.load(f)
-      #self.workflow_queries = json_data["queries"]
-      #self.workflow_queries = populateAndRandomize(json_data)
 
     self.query_results = OrderedDict({ "args": vars(self.options), "results": deque() })
     self.benchmark_start_time = util.get_current_ms_time()
@@ -64,11 +62,7 @@ class SSB:
     except AttributeError:
       pass
 
-    self.workflow = generateFinalQueries(self.workflow,self.driver,logger)
-    self.workflow_queries = list(self.workflow["queries"])
-    # randomize the order
-    random.shuffle(self.workflow_queries)
-
+    self.workflow_queries = randomizeQueries(self.workflow["queries"])
     total_queries = len(self.workflow_queries)
     global total_processed
     total_processed = 0
@@ -107,7 +101,7 @@ class SSB:
     except AttributeError:
       pass
 
-    path = "results_"+str(util.get_current_ms_time())+".json"
+    path = os.path.join("results","results_"+str(util.get_current_ms_time())+".json")
     logger.info("saving results to %s" % path)
     with open(path, "w") as fp:
       res = OrderedDict({
@@ -124,6 +118,9 @@ class SSB:
     query_result["id"] = request.query_id
     query_result["ssb_id"] = request.ssb_id
     query_result["sql"] = request.sql_statement
+    query_result["final-selections"] = request.query["final-selections"]
+    query_result["final-selectivity"] = request.query["final-selectivity"]
+    query_result["original-selectivity"] = request.query["original-selectivity"]
     query_result["start_time"] = request.start_time - self.workflow_start_time
     query_result["end_time"] = request.end_time - self.workflow_start_time
     #query_result["result"] = request.result
@@ -133,7 +130,7 @@ class SSB:
     request.delivered = True
 
   def get_workflow_path(self):
-    return self.ssb_config["workflow-file"]
+    return self.ssb_config["workflow-file"]+".generated"
 
 if __name__ == "__main__":
   SSB()

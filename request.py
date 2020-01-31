@@ -5,6 +5,7 @@ class SqlRequest:
     self.query_id = query_id
     self.ssb_id = query["ssb_id"]
     self.sql_statement = query["sql_statement"]
+    self.query = query
     self.start_time = -1
     self.end_time = -1
     self.result = None

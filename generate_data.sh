@@ -9,6 +9,6 @@ port=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))[
 log_name=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['log-name'])"`
 database_name=`python -c "import sys, json; print(json.load(open(\"${monetdb_config}\"))['database-name'])"`
 
-rm -r $data_folder
+rm -r $data_folder/sf_${scale_factor}
 
-./run_dbgen.sh -r --scale-factor $scale_factor -l $log_name -d $database_name -f $dbfarm_location -p $port -k -D $data_folder
+./run_dbgen.sh -r --scale-factor $scale_factor -l $log_name -d $database_name -f $dbfarm_location -p $port -k -D $data_folder/sf_${scale_factor}

@@ -17,7 +17,7 @@ logger = logging.getLogger("ssb")
 class SSBDriver:
   def init(self, options):
     self.isRunning = False
-    self.requests = queue.LifoQueue()
+    self.requests = queue.Queue() #fifo
     self.config = json.load(open(os.path.join(os.path.dirname(__file__),'..','monetdb.config.json')))
 
   def create_connection(self):
