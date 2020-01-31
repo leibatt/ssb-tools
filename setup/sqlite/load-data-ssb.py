@@ -1,11 +1,18 @@
 import os
-import json
 import sys
-import duckdb
+import sqlite3
+import pandas
+import json
+
+def loadData(tableName,conn,csvfile):
+  print("loading",tableName)
+  df = pandas.read_csv(csvfile,delimeter="|")
+  df.to_sql(tableName, conn, if_exists='append', index=False)
+  print("done loading",tableName)
 
 def run(dbFilename,dataFolder):
-  print("connecting to duckdb")
-  conn = duckdb.connect(dbFilename)
+  print("connecting to sqlite")
+  conn = sqlite3.connect(dbFilename)
   cursor = conn.cursor()
 
   '''
@@ -27,7 +34,7 @@ COPY INTO supplier from '${data_folder}/sf_${scale_factor}/supplier.tbl' USING D
     );
         """)
   data_file = str(os.path.join(dataFolder,'customer.tbl'))
-  cursor.execute("copy customer from '"+data_file+"' (delimiter '|')")
+  loadData("customer",data_file)
 
   print("loading date_")
   cursor.execute("DROP TABLE IF EXISTS date_");
@@ -54,7 +61,7 @@ COPY INTO supplier from '${data_folder}/sf_${scale_factor}/supplier.tbl' USING D
     );
         """)
   data_file = str(os.path.join(dataFolder,'date.tbl'))
-  cursor.execute("copy date_ from '"+data_file+"' (delimiter '|') ")
+  loadData("date_",data_file)
 
   print("loading part")
   cursor.execute("DROP TABLE IF EXISTS part");
@@ -73,7 +80,7 @@ COPY INTO supplier from '${data_folder}/sf_${scale_factor}/supplier.tbl' USING D
     );
         """)
   data_file = str(os.path.join(dataFolder,'part.tbl'))
-  cursor.execute("copy part from '"+data_file+"' (delimiter '|') ")
+  loadData("part",data_file)
  
   print("loading supplier")
   cursor.execute("DROP TABLE IF EXISTS supplier");
@@ -90,7 +97,7 @@ COPY INTO supplier from '${data_folder}/sf_${scale_factor}/supplier.tbl' USING D
     );
         """)
   data_file = str(os.path.join(dataFolder,'supplier.tbl'))
-  cursor.execute("copy supplier from '"+data_file+"' (delimiter '|') ")
+  loadData("supplier",data_file)
 
   print("loading lineorder")
   cursor.execute("DROP TABLE IF EXISTS lineorder");
@@ -121,20 +128,20 @@ COPY INTO supplier from '${data_folder}/sf_${scale_factor}/supplier.tbl' USING D
     );
         """)
   data_file = str(os.path.join(dataFolder,'lineorder.tbl'))
-  cursor.execute("copy lineorder from '"+data_file+"' (delimiter '|') ")
+  loadData("lineorder",data_file)
 
 if __name__ == "__main__":
   
   if len(sys.argv) == 3:
-    duckdbConfigPath = sys.argv[1]
+    sqliteConfigPath = sys.argv[1]
     ssbConfigPath = sys.argv[2]
     try:
-      duckdbConfig = json.load(open(duckdbConfigPath))
+      sqliteConfig = json.load(open(sqliteConfigPath))
       ssbConfig = json.load(open(ssbConfigPath))
-      dbFilename = duckdbConfig['dbFilename']
+      dbFilename = sqliteConfig['dbFilename']
       dataFolder = os.path.join(ssbConfig["data-folder"],"sf_"+str(ssbConfig["scale-factor"]))
       run(dbFilename,dataFolder)
     except Exception as e:
       print(e)
-      print("usage: python",sys.argv[0],"[duckdb config] [ssb config]")
+      print("usage: python",sys.argv[0],"[sqlite config] [ssb config]")
       sys.exit(0)

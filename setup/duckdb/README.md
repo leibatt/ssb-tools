@@ -28,8 +28,7 @@ python run_benchmark_queries.py --driver-name duckdb
 
 # Experiment flow
 In general, all of the following steps should be carried out to have a clean run with DuckDB. The following sections explains each of the scripts.
-1. for each workflow:
-    * run SSB
+1. run SSB
 
 Note that DuckDB doesn't have any setup/teardown requirements, so we do not have to do start/stop of the database. These scripts only exist for consistency's sake.
 

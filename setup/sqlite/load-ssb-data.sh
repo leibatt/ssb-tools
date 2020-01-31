@@ -8,15 +8,14 @@ data_folder=`python -c "import sys, json; print(json.load(open(\"${ssb_config}\"
 scale_factor=`python -c "import sys, json; print(json.load(open(\"${ssb_config}\"))['scale-factor'])"`
 
 # locate the monetdb configuration file
-duckdb_config="${root_dir}/duckdb.config.json"
+sqlite_config="${root_dir}/sqlite.config.json"
 # get the location to put the dbfarm
-dbFilename=`python -c "import sys, json; print(json.load(open(\"${duckdb_config}\"))['dbFilename'])"`
+dbFilename=`python -c "import sys, json; print(json.load(open(\"${sqlite_config}\"))['dbFilename'])"`
 
 if [ -f $dbFilename ] ; then
     rm $dbFilename
 fi
 
 # will make the database in the current folder
-#python setup/duckdb/load_1M.py "${root_dir}/crossfilter-eval-db.duckdb"
-echo "python ${current_dir}/load-ssb-data.py ${duckdb_config} ${ssb_config}"
-python ${current_dir}/load-ssb-data.py ${duckdb_config} ${ssb_config}
+echo "python ${current_dir}/load-ssb-data.py ${sqlite_config} ${ssb_config}"
+python ${current_dir}/load-ssb-data.py ${sqlite_config} ${ssb_config}
