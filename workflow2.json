@@ -22,8 +22,8 @@
       "ssb_id": "1.3",
       "sql_statement":"select sum(lo_extendedprice*lo_discount) as revenue from lineorder, date_ where lo_orderdate = d_datekey and d_weeknuminyear = [WEEKNUMINYEAR-0] and d_year = [YEAR-0] and lo_discount between ([DISCOUNT-0]-1) and ([DISCOUNT-1]+1) and lo_quantity between [QUANTITY-0] and [QUANTITY-1];",
       "parameters": {
-        "weeknuminyear": { "attribute_name": "d_weeknuminyear", "table_name": "date_", "value": [6], "domain": null, "filter-factor": 0.019230769230769,"selectivity": {"select":1,"out-of":52}, "filter-predicate":"d_weeknuminyear = [WEEKNUMINYEAR-0]","selection-type":"equal"},
         "year": { "attribute_name": "d_year", "table_name": "date_", "value": [1994], "domain": null, "filter-factor": 0.142857142857143,"selectivity": {"select":1,"out-of":7}, "filter-predicate":"d_year = [YEAR-0]","selection-type":"equal"},
+        "weeknuminyear": { "attribute_name": "d_weeknuminyear", "table_name": "date_", "value": [6], "domain": null, "filter-factor": 0.019230769230769,"selectivity": {"select":1,"out-of":52}, "filter-predicate":"d_weeknuminyear = [WEEKNUMINYEAR-0]","selection-type":"equal","depends":["year"]},
         "quantity": { "attribute_name": "lo_quantity", "table_name": "lineorder", "value": [36,40] , "domain": null, "filter-factor": 0.1,"selectivity": {"select":5,"out-of":50}, "filter-predicate":"lo_quantity between [QUANTITY-0] and [QUANTITY-1]","selection-type":"between"},
         "discount": { "attribute_name": "lo_discount", "table_name": "lineorder", "value": [6,6], "domain": null, "filter-factor": 0.272727272727273,"selectivity": {"select":3,"out-of":11}, "filter-predicate":"lo_discount between [DISCOUNT-0]-1 and [DISCOUNT-1]+1","selection-type":"between-equal"}
       }, "base-query": "select [ATTRIBUTES] from lineorder, date_ where lo_orderdate = d_datekey;"

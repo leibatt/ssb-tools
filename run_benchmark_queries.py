@@ -64,7 +64,7 @@ class SSB:
     except AttributeError:
       pass
 
-    self.workflow = generateFinalQueries(self.workflow,self.driver)
+    self.workflow = generateFinalQueries(self.workflow,self.driver,logger)
     self.workflow_queries = list(self.workflow["queries"])
     # randomize the order
     random.shuffle(self.workflow_queries)
@@ -107,7 +107,7 @@ class SSB:
     except AttributeError:
       pass
 
-    path = "results.json"
+    path = "results_"+str(util.get_current_ms_time())+".json"
     logger.info("saving results to %s" % path)
     with open(path, "w") as fp:
       res = OrderedDict({
@@ -126,7 +126,8 @@ class SSB:
     query_result["sql"] = request.sql_statement
     query_result["start_time"] = request.start_time - self.workflow_start_time
     query_result["end_time"] = request.end_time - self.workflow_start_time
-    query_result["result"] = request.result
+    #query_result["result"] = request.result
+    query_result["total_rows"] = len(request.result)
   
     self.query_results["results"].append(query_result)
     request.delivered = True
