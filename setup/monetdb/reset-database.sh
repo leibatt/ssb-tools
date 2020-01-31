@@ -5,3 +5,4 @@ ${current_dir}/./stop-database.sh
 ${current_dir}/./remove-database.sh
 ${current_dir}/./create-database.sh
 ${current_dir}/./start-database.sh
+${current_dir}/./setup-user.sh
