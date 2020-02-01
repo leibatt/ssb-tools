@@ -1,5 +1,5 @@
 # using run-workflow.sh with SQLite
-To run a workflow using the main bash script and SQLite, run the following in the root repository folder (i.e., the `ssb-tools-fork` root folder):
+To run SSB using the main bash script and SQLite, run the following in the root repository folder (i.e., the `ssb-tools-fork` root folder):
 ```
 ./run-workflow.sh [env folder location] sqlite [result destination]
 ```
@@ -8,6 +8,8 @@ Example:
 ```
 ./run-workflow.sh ../env sqlite results/test
 ```
+
+NOTE: you can configure SQLite using the `sqlite.config.json` file in the root repository folder (i.e., the `ssb-tools-fork` root folder)
 
 NOTE: this script assumes you are using a virtual environment to run Python with SSB. "env folder location" refers to the location of the Python virtual environment setup for running SSB.
 

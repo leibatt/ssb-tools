@@ -9,6 +9,8 @@ Example:
 ./run-workflow.sh ../env duckdb results/test
 ```
 
+NOTE: you can configure DuckDB using the `duckdb.config.json` file in the root repository folder (i.e., the `ssb-tools-fork` root folder)
+
 NOTE: this script assumes you are using a virtual environment to run Python with SSB. "env folder location" refers to the location of the Python virtual environment setup for running SSB.
 
 NOTE: starting/stopping the database doesn't actually do anything with DuckDB, so you can ignore these scripts (included just so the execution flow is consistent for the `run-workflow.sh` script).

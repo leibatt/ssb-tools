@@ -9,6 +9,8 @@ Example:
 ./run-workflow.sh ../env postgresql results/test
 ```
 
+NOTE: you can configure PostgreSQL using the `postgresql.config.json` file in the root repository folder (i.e., the `ssb-tools-fork` root folder)
+
 NOTE: this script assumes you are using a virtual environment to run Python with SSB. "env folder location" refers to the location of the Python virtual environment setup for running SSB.
 
 NOTE: this assumes someone already went through the trouble of setting up PostgreSQL separately (these scripts will not setup postgresql for you!)
@@ -35,12 +37,12 @@ python run_benchmark_queries.py --driver-name postgresql
 
 # Experiment flow
 In general, all of the following steps should be carried out to have a clean run with PostgreSQL. The following sections explains each of the scripts.
-1. start the database (using `start-database.sh`)
-2. load the data (e.g., `load-ssb-data.sh`)
+1. [once] start the database (using `start-database.sh`)
+2. [once] load the data (e.g., `load-ssb-data.sh`)
 3. stop the database (using `stop-database.sh`)
 4. start the database (using `start-database.sh`)
 5. run SSB
-6. stop the database one final time (using `stop-database.sh`)
+6. [once] stop the database one final time (using `stop-database.sh`)
 
 Note that steps 1, 2 and 6 just need to be done once before and after all the experiments are run, respectively.
 
