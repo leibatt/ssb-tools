@@ -6,7 +6,8 @@ import json
 
 def loadData(tableName,conn,csvfile,attributeNames):
   print("loading",tableName)
-  df = pandas.read_csv(csvfile,delimiter="|",header=None)
+  df = pandas.read_csv(csvfile,delimiter="|",header=None,usecols=list(range(len(attributeNames))))
+  print(df.loc[[0]])
   df.columns = attributeNames
   print(df.loc[[0]])
   df.to_sql(tableName, conn, if_exists='append', index=False)
