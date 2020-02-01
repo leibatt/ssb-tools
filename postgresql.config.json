@@ -5,5 +5,7 @@
   "psql_loc":"/scratch1/postgres/bin/psql",
   "log_loc":"/scratch1/postgres/logfile",
   "password":"XA*yiTx_8Hko",
+  "database-name": "ssb-test",
+  "username": "ssbuser",
   "port":5431
 }
