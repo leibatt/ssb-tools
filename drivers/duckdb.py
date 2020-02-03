@@ -41,6 +41,26 @@ class SSBDriver:
             results.append(row)
         return results
 
+    def execute_request(self, request, result_queue, options):
+        sql_statement = request.sql_statement
+        #logger.info("(%s) %s" % (request.ssb_id,sql_statement))
+        # get a connection from the pool - block if non is available
+        connection = self.create_connection()
+        cursor = connection.cursor()
+        request.start_time = util.get_current_ms_time()
+        cursor.execute(sql_statement)
+        data = cursor.fetchall()
+        request.end_time = util.get_current_ms_time()
+
+        # put connection back in the queue so the next thread can use it.
+        cursor.close()
+
+        results = []
+        for row in data:
+            results.append(row)
+        request.result = results
+        result_queue.put(request)
+
     def process_request(self, request, result_queue, options):
         self.requests.put((request, result_queue, options))
 
@@ -55,13 +75,13 @@ class SSBDriver:
                 options = requestObject[2]
 
                 self.execute_request(request, result_queue, options)
-             except Empty:
-                 # ignore queue-empty exceptions
-                 pass
-             except Exception as e:
-                 logger.error("exception occurred")
-                 logger.error(e)
-                 raise
+            except Empty:
+                # ignore queue-empty exceptions
+                pass
+            except Exception as e:
+                logger.error("exception occurred")
+                logger.error(e)
+                raise
         self.conn.close()
         return
 
