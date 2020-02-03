@@ -1,8 +1,1 @@
-{
-  "host": "localhost",
-  "port": 5431,
-  "password": "XA*yiTx_8Hko",
-  "scramblePercent": 10,
-  "username": "ssbuser",
-  "database-name": "ssb-test"
-}
+{"username": "ssbuser", "database-name": "ssb-test", "host": "localhost", "scramblePercent": 10, "password": "XA*yiTx_8Hko", "port": 5431}

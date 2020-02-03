@@ -1,5 +1,1 @@
-{
-  "scale-factor":1,
-  "data-folder":"/scratch1/leilani/code/ssb-tools-fork/generated_data",
-  "workflow-file":"workflow2.json"
-}
+{"data-folder": "/scratch1/leilani/code/ssb-tools-fork/generated_data", "scale-factor": 1, "workflow-file": "workflow2.json"}

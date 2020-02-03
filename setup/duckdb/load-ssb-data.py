@@ -112,14 +112,20 @@ COPY INTO supplier from '${data_folder}/sf_${scale_factor}/supplier.tbl' USING D
       lo_supplycost    INT,     -- numeric (for part, cost from supplier, max = ?)
       lo_tax           INT,     -- numeric 0-8 (for part)
       lo_commitdate    INT,     -- foreign key reference to d_datekey
-      lo_shipmode      STRING,  -- varchar(10) --fixed text, size 10 (modes: reg air, air, etc.)
-      PRIMARY KEY (lo_orderkey, lo_linenumber), --Compound Primary Key: ORDERKEY, LINENUMBER
+      lo_shipmode      STRING  -- varchar(10) --fixed text, size 10 (modes: reg air, air, etc.)
+    );
+        """)
+  # duckdb does not currently support compound primary keys, so removed it
+  '''
+      PRIMARY KEY (lo_orderkey, lo_linenumber) --Compound Primary Key: ORDERKEY, LINENUMBER
+  '''
+  # duckdb does not currently support foreign keys, so removed them
+  '''
       FOREIGN KEY (lo_orderdate)  REFERENCES date_    (d_datekey), --identifier foreign key reference to D_DATEKEY
       FOREIGN KEY (lo_commitdate) REFERENCES date_    (d_datekey), --Foreign Key reference to D_DATEKEY
       FOREIGN KEY (lo_suppkey)    REFERENCES supplier (s_suppkey), --numeric identifier foreign key reference to S_SUPPKEY
       FOREIGN KEY (lo_custkey)    REFERENCES customer (c_custkey)  --numeric identifier foreign key reference 
-    );
-        """)
+  '''
   data_file = str(os.path.join(dataFolder,'lineorder.tbl'))
   cursor.execute("copy lineorder from '"+data_file+"' (delimiter '|') ")
 
