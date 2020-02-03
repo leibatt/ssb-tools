@@ -43,9 +43,9 @@ class SSBDriver:
     return results
 
   def execute_request(self, request, result_queue, options):
-    # get a connection from the pool - block if non is available
     sql_statement = request.sql_statement
     #logger.info("(%s) %s" % (request.ssb_id,sql_statement))
+    # get a connection from the pool - block if non is available
     connection = self.pool.get()
     cursor = connection.cursor()
     request.start_time = util.get_current_ms_time()
