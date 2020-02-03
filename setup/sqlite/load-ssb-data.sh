@@ -9,7 +9,6 @@ scale_factor=`python -c "import sys, json; print(json.load(open(\"${ssb_config}\
 
 # locate the monetdb configuration file
 sqlite_config="${root_dir}/sqlite.config.json"
-# get the location to put the dbfarm
 dbFilename=`python -c "import sys, json; print(json.load(open(\"${sqlite_config}\"))['dbFilename'])"`
 
 if [ -f $dbFilename ] ; then
