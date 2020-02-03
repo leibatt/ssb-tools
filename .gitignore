@@ -30,3 +30,4 @@ __pycache__/
 drivers/__pycache__/
 ssb-test.duckdb*
 ssb-test.sqlite
+workflow2.json.generated

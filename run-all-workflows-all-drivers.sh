@@ -20,7 +20,7 @@ rm stop_scripts
 echo "creating run folder ${RUN_FOLDERNAME}"
 mkdir -p $RUN_FOLDERNAME
 
-for SCALE_FACTOR in 1
+for SCALE_FACTOR in 2
 do
   LOGFILE="${RUN_FOLDERNAME}/output.txt"
   echo "logfile for storing all output: ${LOGFILE}"
@@ -30,6 +30,7 @@ do
   echo "python -c \"import sys, json; config=json.load(open('${ssb_config}')); config['scale-factor'] = ${SCALE_FACTOR}; json.dump(config,open('ssb.config.json','w')); \"" >> $LOGFILE 2>&1
   python -c "import sys, json; config=json.load(open('${ssb_config}')); config['scale-factor'] = ${SCALE_FACTOR}; json.dump(config,open('ssb.config.json','w'))"
   data_folder=`python -c "import sys, json; print(json.load(open('${ssb_config}'))['data-folder'])"`
+  workflow_file=`python -c "import sys, json; print(json.load(open('${ssb_config}'))['workflow-file'])"`
 
 
   echo "stopping all DBMSs" >> $LOGFILE 2>&1
@@ -67,8 +68,8 @@ do
 
   echo "mkdir -p ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}" >> $LOGFILE 2>&1
   mkdir -p ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}
-  echo "cp workflow2.generated ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}" >> $LOGFILE 2>&1
-  cp workflow2.generated ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}
+  echo "cp ${workflow_file}.generated ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/ssb_workflow.json" >> $LOGFILE 2>&1
+  cp ${workflow_file}.generated ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/ssb_workflow.json
 
   echo "deactivating environment" >> $LOGFILE 2>&1
   deactivate >> $LOGFILE 2>&1
@@ -92,8 +93,8 @@ do
     mv ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER} ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER}-${SCRAMBLE_PERCENT} >> $LOGFILE 2>&1
   done
 
-  #for DRIVER in "monetdb" "postgresql" "sqlite" "duckdb"
-  for DRIVER in "monetdb" "postgresql"
+  for DRIVER in "monetdb" "postgresql" "sqlite" "duckdb"
+  #for DRIVER in "monetdb" "postgresql"
   do
     echo "running SSB with ${DRIVER} and scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
     echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME >> $LOGFILE" 2>&1
