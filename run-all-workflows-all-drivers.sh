@@ -1,14 +1,16 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
-  echo "You must specify python virtual environment directory"
-  echo "Usage: ./run-all-workflows-all-drivers.sh [env folder location]"
-  echo "Example: ./run-all-workflows-all-drivers.sh ../env"
+if [ "$#" -ne 2 ]; then
+  echo "You must specify python virtual environment directory and total runs per driver"
+  echo "Usage: ./run-all-workflows-all-drivers.sh [env folder location] [total runs]"
+  echo "Example: ./run-all-workflows-all-drivers.sh ../env 1"
   exit 0
 fi
 
 # the virtual environment to use
 ENVIR_FOLDER=$1
+# total runs
+TOTAL_RUNS=$2
 
 #nicely formatted timestamp
 RUN_TIMESTAMP=$(date +%m-%d-%y_%T)
@@ -20,7 +22,7 @@ rm stop_scripts
 echo "creating run folder ${RUN_FOLDERNAME}"
 mkdir -p $RUN_FOLDERNAME
 
-for SCALE_FACTOR in 2
+for SCALE_FACTOR in 1 2 4 8
 do
   LOGFILE="${RUN_FOLDERNAME}/output.txt"
   echo "logfile for storing all output: ${LOGFILE}"
@@ -81,24 +83,29 @@ do
     echo "eventually saving to ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER}-${SCRAMBLE_PERCENT}" >> $LOGFILE 2>&1
     echo "python -c \"import sys, json; config=json.load(open('verdictdb.config.json')); config['scramblePercent'] = ${SCRAMBLE_PERCENT}; json.dump(config,open('verdictdb.config.json','w')); \"" >> $LOGFILE 2>&1
     python -c "import sys, json; config=json.load(open('verdictdb.config.json')); config['scramblePercent'] = ${SCRAMBLE_PERCENT}; json.dump(config,open('verdictdb.config.json','w'))"
-    echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME >> $LOGFILE" 2>&1
-    ./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME >> $LOGFILE 2>&1
+    echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE" 2>&1
+    ./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE 2>&1
   
     if [ -f "stop_scripts" ]; then
       echo "stopping execution of run-all-workflows-all-drivers.sh" >> $LOGFILE 2>&1
       exit 0
     fi
-      
-    echo "mv ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER} ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER}-${SCRAMBLE_PERCENT}" >> $LOGFILE 2>&1
-    mv ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER} ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER}-${SCRAMBLE_PERCENT} >> $LOGFILE 2>&1
+
+    # move the verdictdb folders to the right place
+    RUN_ID=0
+    while [ $RUN_ID -ne $TOTAL_RUNS ]
+do
+      echo "mv ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/run_${RUN_ID}/${DRIVER} ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/run_${RUN_ID}/${DRIVER}-${SCRAMBLE_PERCENT}" >> $LOGFILE 2>&1
+      mv ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER} ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER}-${SCRAMBLE_PERCENT} >> $LOGFILE 2>&1
+    done
   done
 
   for DRIVER in "monetdb" "postgresql" "sqlite" "duckdb"
   #for DRIVER in "monetdb" "postgresql"
   do
     echo "running SSB with ${DRIVER} and scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
-    echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME >> $LOGFILE" 2>&1
-    ./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME >> $LOGFILE 2>&1
+    echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE" 2>&1
+    ./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE 2>&1
 
     if [ -f "stop_scripts" ]; then
       echo "stopping execution of run-all-workflows-all-drivers.sh" >> $LOGFILE 2>&1
