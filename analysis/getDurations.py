@@ -14,7 +14,7 @@ def computeCi95Upper(s):
 def generate_results_all_scale_factors(filepath):
   res = []
   #for size in ["sf_1","sf_2","sf_4","sf_8"]:
-  for size in ["sf_1","sf_2","sf_4"]:
+  for size in ["sf_1","sf_2","sf_4","sf_8"]:
     sizeName = size.replace("sf_","")
     print("evaluating scale factor:",size)
     sizePath = os.path.join(filepath,size)
@@ -85,7 +85,9 @@ if __name__ == "__main__":
   if len(sys.argv) > 1:
     filepath = sys.argv[1]
     df,durationMeans=generate_results_all_scale_factors(filepath)
-    print(durationMeans.to_json(orient="records"))
+    #print(durationMeans.to_json(orient="records"))
+    for row in json.loads(durationMeans.to_json(orient="records")):
+      print(row)
     with open(os.path.join(filepath,"ssb_final_results.json"),"w") as f:
       f.write(durationMeans.to_json(orient="records"))
   else:
