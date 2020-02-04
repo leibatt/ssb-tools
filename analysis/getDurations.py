@@ -18,8 +18,6 @@ def generate_results_all_scale_factors(filepath):
     sizeName = size.replace("sf_","")
     print("evaluating scale factor:",size)
     sizePath = os.path.join(filepath,size)
-    # there will be multiple run folders in the scale factor folder
-    # TODO: handle run folders
     if os.path.exists(sizePath):
       res1 = consolidate_results_all_runs(sizePath)
       for r in res1:
@@ -35,8 +33,8 @@ def generate_results_all_scale_factors(filepath):
     durationCiUpper=('duration', computeCi95Upper),
     durationStd=('duration', 'std')
   ).reset_index().copy()
-  aggResDescribe = resDf.groupby(["scale_factor", "driver","ssb_id"]).agg('describe')['duration'].reset_index()
-  print(aggResDescribe.to_json(orient="records"))
+  #aggResDescribe = resDf.groupby(["scale_factor", "driver","ssb_id"]).agg('describe')['duration'].reset_index()
+  #print(aggResDescribe.to_json(orient="records"))
   return resDf,aggRes
 
 def consolidate_results_all_runs(filepath):
