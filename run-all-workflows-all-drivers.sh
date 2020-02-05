@@ -76,7 +76,7 @@ do
   echo "deactivating environment" >> $LOGFILE 2>&1
   deactivate >> $LOGFILE 2>&1
 
-  for SCRAMBLE_PERCENT in 10
+  for SCRAMBLE_PERCENT in 50
   do
     DRIVER="verdictdb"
     echo "running SSB with ${DRIVER} and scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
