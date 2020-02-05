@@ -7,8 +7,10 @@ def run(verdictdbConfig):
   password=verdictdbConfig['password']
   conn=pyverdict.postgres(host=verdictdbConfig['host'],user=verdictdbConfig['username'],password=password,port=port,dbname=verdictdbConfig['database-name'])
   conn.set_loglevel("ERROR")
+  scramblePercent = verdictdbConfig['scramblePercent']
+  scrambleFrac = scramblePercent / 100.0
 
-  df=conn.sql('DROP SCRAMBLE "public"."lineorder_scrambled_10_percent" on "public"."lineorder" SIZE 0.1')
+  df=conn.sql('DROP SCRAMBLE "public"."lineorder_scrambled_'+str(scramblePercent)+'_percent" on "public"."lineorder" SIZE '+str(scrambleFrac))
   
 if __name__ == "__main__":
   if len(sys.argv) > 2:

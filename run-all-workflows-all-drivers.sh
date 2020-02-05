@@ -100,17 +100,17 @@ do
     done
   done
 
-  for DRIVER in "monetdb" "postgresql" "sqlite" "duckdb"
-  #for DRIVER in "monetdb" "postgresql"
-  do
-    echo "running SSB with ${DRIVER} and scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
-    echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE" 2>&1
-    ./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE 2>&1
+  #for DRIVER in "monetdb" "postgresql" "sqlite" "duckdb"
+  ##for DRIVER in "monetdb" "postgresql"
+  #do
+  #  echo "running SSB with ${DRIVER} and scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
+  #  echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE" 2>&1
+  #  ./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE 2>&1
 
-    if [ -f "stop_scripts" ]; then
-      echo "stopping execution of run-all-workflows-all-drivers.sh" >> $LOGFILE 2>&1
-      exit 0
-    fi
-  done
+  #  if [ -f "stop_scripts" ]; then
+  #    echo "stopping execution of run-all-workflows-all-drivers.sh" >> $LOGFILE 2>&1
+  #    exit 0
+  #  fi
+  #done
 done
 

@@ -5,7 +5,7 @@ import pandas
 import json
 
 def loadData(tableName,conn,csvfile,attributeNames):
-  print("loading",tableName)
+  #print("loading",tableName)
   df = pandas.read_csv(csvfile,delimiter="|",header=None,usecols=list(range(len(attributeNames))))
   #print(df.loc[[0]])
   df.columns = attributeNames
