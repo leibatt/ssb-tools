@@ -25,7 +25,9 @@ def run(verdictdbConfig):
   #df=conn.sql('DROP SCRAMBLE "public"."date__scrambled_10_percent" on "public"."date_" SIZE 0.1')
   #df=conn.sql('CREATE SCRAMBLE "public"."date__scrambled_10_percent" from "public"."date_" SIZE 0.1')
   
+  print('DROP SCRAMBLE "public"."lineorder_scrambled_'+str(scramblePercent)+'_percent" on "public"."lineorder" SIZE ' + str(scrambleFrac))
   df=conn.sql('DROP SCRAMBLE "public"."lineorder_scrambled_'+str(scramblePercent)+'_percent" on "public"."lineorder" SIZE ' + str(scrambleFrac))
+  print('CREATE SCRAMBLE "public"."lineorder_scrambled_'+str(scramblePercent)+'_percent" from "public"."lineorder" SIZE ' + str(scrambleFrac))
   df=conn.sql('CREATE SCRAMBLE "public"."lineorder_scrambled_'+str(scramblePercent)+'_percent" from "public"."lineorder" SIZE ' + str(scrambleFrac))
   
   #df=conn.sql('DROP SCRAMBLE "public"."part_scrambled_10_percent" on "public"."part" SIZE 0.1')
