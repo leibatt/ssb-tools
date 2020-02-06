@@ -57,17 +57,8 @@ class SSBDriver:
         connection=self.conn
 
         request.start_time = util.get_current_ms_time()
-        data = None
-        try:
-            editedSqlStatement = self.verdictdbedit(sql_statement)
-            data = connection.sql(editedSqlStatement)
-        except Exception as e:
-            print(e, flush=True)
-            request.result = {}
-            request.verdictdb_query = sql_statement
-            request.end_time = util.get_current_ms_time()
-            result_queue.put(request)
-            return
+        editedSqlStatement = self.verdictdbedit(sql_statement)
+        data = connection.sql(editedSqlStatement)
         request.end_time = util.get_current_ms_time()
 
         #results = []
@@ -97,9 +88,9 @@ class SSBDriver:
                 # ignore queue-empty exceptions
                 pass
             except Exception as e:
-                # ignore queue-empty exceptions
-                print(e, flush=True)
-                pass
+                logger.error("exception occurred")
+                logger.error(e)
+                raise
         self.conn.close()
 
     def workflow_start(self):
