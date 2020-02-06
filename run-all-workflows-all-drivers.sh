@@ -22,6 +22,7 @@ rm stop_scripts
 echo "creating run folder ${RUN_FOLDERNAME}"
 mkdir -p $RUN_FOLDERNAME
 
+#for SCALE_FACTOR in 1
 for SCALE_FACTOR in 1 2 4 8
 do
   LOGFILE="${RUN_FOLDERNAME}/output.txt"
@@ -59,6 +60,12 @@ do
   echo "loading datasets for scale factor ${SCALE_FACTOR} into all DBMSs" >> $LOGFILE 2>&1
   ./setup/load-ssb-data.sh >> $LOGFILE 2>&1
 
+  ## data loading only for verdictdb
+  #echo "loading MonetDB, PostgreSQL and VerdictDB for scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
+  #./setup/monetdb/load-ssb-data.sh >> $LOGFILE 2>&1
+  #./setup/postgresql/load-ssb-data.sh >> $LOGFILE 2>&1
+  #./setup/verdictdb/create_scrambles.sh >> $LOGFILE 2>&1
+
   if [ -f "stop_scripts" ]; then
     echo "stopping execution of run-all-workflows-all-drivers.sh" >> $LOGFILE 2>&1
     deactivate
@@ -76,7 +83,7 @@ do
   echo "deactivating environment" >> $LOGFILE 2>&1
   deactivate >> $LOGFILE 2>&1
 
-  for SCRAMBLE_PERCENT in 50
+  for SCRAMBLE_PERCENT in 10
   do
     DRIVER="verdictdb"
     echo "running SSB with ${DRIVER} and scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
@@ -94,23 +101,29 @@ do
     # move the verdictdb folders to the right place
     RUN_ID=0
     while [ $RUN_ID -ne $TOTAL_RUNS ]
-do
+    do
       echo "mv ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/run_${RUN_ID}/${DRIVER} ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/run_${RUN_ID}/${DRIVER}-${SCRAMBLE_PERCENT}" >> $LOGFILE 2>&1
       mv ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/run_${RUN_ID}/${DRIVER} ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/run_${RUN_ID}/${DRIVER}-${SCRAMBLE_PERCENT} >> $LOGFILE 2>&1
+
+      ((RUN_ID++))
+      if [ -f "stop_scripts" ]; then
+        echo "stopping execution of run-all-workflows-all-drivers.sh" >> $LOGFILE 2>&1
+        exit 0
+      fi
     done
   done
 
-  #for DRIVER in "monetdb" "postgresql" "sqlite" "duckdb"
-  ##for DRIVER in "monetdb" "postgresql"
-  #do
-  #  echo "running SSB with ${DRIVER} and scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
-  #  echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE" 2>&1
-  #  ./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE 2>&1
+  #for DRIVER in "monetdb" "postgresql"
+  for DRIVER in "monetdb" "postgresql" "duckdb" "sqlite"
+  do
+    echo "running SSB with ${DRIVER} and scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
+    echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE" 2>&1
+    ./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE 2>&1
 
-  #  if [ -f "stop_scripts" ]; then
-  #    echo "stopping execution of run-all-workflows-all-drivers.sh" >> $LOGFILE 2>&1
-  #    exit 0
-  #  fi
-  #done
+    if [ -f "stop_scripts" ]; then
+      echo "stopping execution of run-all-workflows-all-drivers.sh" >> $LOGFILE 2>&1
+      exit 0
+    fi
+  done
 done
 

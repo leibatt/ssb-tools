@@ -57,18 +57,26 @@ class SSBDriver:
         connection=self.conn
 
         request.start_time = util.get_current_ms_time()
-        editedSqlStatement = self.verdictdbedit(sql_statement)
-        data = connection.sql(editedSqlStatement)
+        try:
+            editedSqlStatement = self.verdictdbedit(sql_statement)
+            data = connection.sql(editedSqlStatement)
+        except ValueError as e:
+            print(e, flush=True)
+            request.result = []
+            request.end_time = util.get_current_ms_time()
+            request.verdictdb_query = editedSqlStatement
+            result_queue.put(request)
+            return
         request.end_time = util.get_current_ms_time()
 
         #results = []
         #for row in data.iterrows():
         #  results.append(row)
         results = json.loads(data.to_json(orient="records"))
-        print(editedSqlStatement)
-        print(results)
+        #print(editedSqlStatement)
+        #print(results)
         request.result = results
-        request.verdictdb_query = sql_statement
+        request.verdictdb_query = editedSqlStatement
         result_queue.put(request)
 
     def process_request(self, request, result_queue, options):
