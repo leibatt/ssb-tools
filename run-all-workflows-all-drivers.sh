@@ -88,8 +88,18 @@ do
     DRIVER="verdictdb"
     echo "running SSB with ${DRIVER} and scale factor ${SCALE_FACTOR}" >> $LOGFILE 2>&1
     echo "eventually saving to ${RUN_FOLDERNAME}/sf_${SCALE_FACTOR}/${DRIVER}-${SCRAMBLE_PERCENT}" >> $LOGFILE 2>&1
+
+    # drop the old scrambles
+    echo "./setup/verdictdb/drop_scrambles.sh" >> $LOGFILE 2>&1
+    ./setup/verdictdb/drop_scrambles.sh >> $LOGFILE 2>&1
+
     echo "python -c \"import sys, json; config=json.load(open('verdictdb.config.json')); config['scramblePercent'] = ${SCRAMBLE_PERCENT}; json.dump(config,open('verdictdb.config.json','w')); \"" >> $LOGFILE 2>&1
     python -c "import sys, json; config=json.load(open('verdictdb.config.json')); config['scramblePercent'] = ${SCRAMBLE_PERCENT}; json.dump(config,open('verdictdb.config.json','w'))"
+
+    # create the new scrambles
+    echo "./setup/verdictdb/create_scrambles.sh" >> $LOGFILE 2>&1
+    ./setup/verdictdb/create_scrambles.sh >> $LOGFILE 2>&1
+
     echo "./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE" 2>&1
     ./run-workflows-for-dataset.sh $ENVIR_FOLDER $SCALE_FACTOR $DRIVER $RUN_FOLDERNAME $TOTAL_RUNS >> $LOGFILE 2>&1
   

@@ -86,8 +86,21 @@ if __name__ == "__main__":
     filepath = sys.argv[1]
     df,durationMeans=generate_results_all_scale_factors(filepath)
     #print(durationMeans.to_json(orient="records"))
+    i = 0
+    r = ""
+    start = True
+    print("1.1,1.2,1.3,2.1,2.2,2.3,3.1,3.2,3.3,3.4,4.1,4.2,4.3")
     for row in json.loads(durationMeans.to_json(orient="records")):
-      print(row)
+      #print(",".join([str(row["scale_factor"]),row["driver"],str(row["ssb_id"]),str(row["meanDuration"])]))
+      if i < 13 and not start:
+        r += ","+str(row["meanDuration"])
+      else:
+        print(r)
+        start = False
+        i = 0
+        r = ",".join([str(row["scale_factor"])+"GB",row["driver"],str(row["meanDuration"])])
+      i += 1
+    print(r)
     with open(os.path.join(filepath,"ssb_final_results.json"),"w") as f:
       f.write(durationMeans.to_json(orient="records"))
   else:
